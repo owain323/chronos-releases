@@ -100,18 +100,13 @@ export async function createContext(
         }
       }
 
-      // R8: 生产环境 workspaceId 缺失即拒绝, 消除多租户兜底越权面
-      // 测试/开发环境保留 fallback 以兼容现有集成测试
+      // R8: workspaceId 缺失时自动 fallback 到用户第一个 workspace
+      // v3.9.2: 去掉生产环境抛错 — 手机/平板无 x-workspace-id header 会挡所有请求
+      // 多租户越权面由 permissions matrix + requireProjectAccess 在路由层兜底
       let finalWorkspaceId = workspaceId;
       if (!finalWorkspaceId) {
-        if (process.env.NODE_ENV === "production") {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "X-Workspace-Id header required",
-          });
-        }
         console.warn(
-          "[Context] workspaceId missing — falling back to first workspace (dev/test only)"
+          "[Context] workspaceId missing — falling back to first workspace"
         );
         const db2 = await import("../db/connection").then(m => m.db);
         const first = db2
