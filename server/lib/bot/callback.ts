@@ -133,7 +133,7 @@ export async function handleBotCallback(
             { mediaId, msgType, originalName: parsed.FileName },
             platformUserId,
             ctx.chronosUserId,
-            ctx.currentProjectId // workspaceId via project association
+            null // workspaceId resolved at /save time via project lookup
           );
           if (reply) return { reply };
           return { reply: buildInboxReply(platformUserId) };
