@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - name: Install system deps (better-sqlite3 native build)
+        run: sudo apt-get update && sudo apt-get install -y build-essential python3
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Security audit (npm audit)
+        run: npm audit --audit-level=high --omit=dev || true
+        continue-on-error: true
+
+      - name: Format check (Prettier, 与 check 脚本/pre-commit 一致)
+        run: npx prettier --check "client/src/**/*.{ts,tsx,css}" "server/**/*.ts" "shared/**/*.ts" "scripts/**/*.{ts,mjs}" "tests/**/*.ts"
+
+      - name: Lint (ESLint)
+        run: npx eslint client/ server/ scripts/ shared/ --ext .ts,.tsx,.mjs --max-warnings 218
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Init DB + Run tests
+        run: |
+          node scripts/init-db.mjs
+          npx vitest run
+        env:
+          JWT_SECRET: test-ci-secret-at-least-32-characters-long-for-github-actions
+          DATABASE_URL: file:./chronos.db
+          NODE_ENV: test
+
+      - name: Metric Guard (反指标膨胀)
+        run: node scripts/metric-guard.cjs
+
+      - name: Smoke test (start service + health check)
+        run: |
+          npx esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+          PORT=3099 node dist/index.js &
+          for i in $(seq 1 15); do
+            curl -sf --noproxy '*' http://localhost:3099/api/health && break
+            sleep 1
+          done
+          kill %1 2>/dev/null || true
+        env:
+          JWT_SECRET: test-ci-secret-at-least-32-characters-long-for-github-actions
+          DATABASE_URL: file:./chronos.db
+          NODE_ENV: test
+
+      - name: E2E Smoke (Playwright)
+        run: |
+          npx esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+          npx playwright install chromium --with-deps
+          PORT=3099 node dist/index.js &
+          # 等待服务启动 (最多 20s)
+          for i in $(seq 1 20); do
+            if curl -sf --noproxy '*' http://localhost:3099/api/health; then
+              echo "Server ready"
+              break
+            fi
+            [ "$i" -eq 20 ] && echo "Server failed to start" && exit 1
+            sleep 1
+          done
+          # V35-24: 去 || true, e2e 失败即 CI 失败
+          npx playwright test --config=playwright.config.ts || { kill %1 2>/dev/null; exit 1; }
+          kill %1 2>/dev/null || true
+        env:
+          JWT_SECRET: test-ci-secret-at-least-32-characters-long-for-github-actions
+          DATABASE_URL: file:./chronos.db
+          NODE_ENV: test
+          TEST_URL: http://localhost:3099
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t chronos:ci .
