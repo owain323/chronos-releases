@@ -1,13 +1,9 @@
 /**
  * financials.ts — 财智财务模块 v5 核心计算引擎
  *
- * 纯函数服务层：所有财务报表（试算平衡/资产负债表/利润表/现金流量表/
- * 权益变动表/财务比率/预算对比/期末结转）的计算逻辑都集中在这里。
- *
- * 设计原则：
- *  - 不依赖数据库，输入是「科目数组 + 凭证数组」，输出是结构化报表对象。
- *    这样既能独立单元测试，也能被 tRPC router 直接调用（router 负责查库后喂数据）。
- *  - 与原版财智 HTML（多借多贷 lines 数组）在数学上完全等价：
+ * v4.1 T4: 使用 money.ts 整数分工具防浮点累积误差
+ *  - toCents() 转整数分做加减
+ *  - toDisplay() 转回数值输出
  *    CHRONOS 用单借单贷 journalEntries，所有报表只关心「每个科目的借贷发生额汇总」，
  *    对每笔凭证拆成单借单贷后汇总结果与多行 lines 一致。
  *  - 余额方向：asset/expense 为借增类（余额=借-贷），liability/equity/income 为贷增类（余额=贷-借）。
@@ -16,6 +12,8 @@
 export type AccountType =
   "asset" | "liability" | "equity" | "income" | "expense";
 export type CashFlowCategory = "operating" | "investing" | "financing";
+
+import { toCents, toDisplay } from "../lib/money";
 
 export interface FinAccount {
   id: number;
@@ -54,14 +52,16 @@ export function accountBalance(
   entries: FinEntry[],
   asOf: string
 ): number {
-  let debit = 0;
-  let credit = 0;
+  // v4.1 T4: 整数分累加, 消除浮点累积误差
+  let debitCents = 0;
+  let creditCents = 0;
   for (const e of entries) {
     if (e.date > asOf) continue;
-    if (e.debitAccountId === acc.id) debit += e.debitAmount;
-    if (e.creditAccountId === acc.id) credit += e.creditAmount;
+    if (e.debitAccountId === acc.id) debitCents += toCents(e.debitAmount);
+    if (e.creditAccountId === acc.id) creditCents += toCents(e.creditAmount);
   }
-  return isDebitIncrease(acc.type) ? debit - credit : credit - debit;
+  const balance = isDebitIncrease(acc.type) ? debitCents - creditCents : creditCents - debitCents;
+  return toDisplay(balance);
 }
 
 /** 科目在 [start,end] 内的借贷发生额 */
@@ -71,14 +71,15 @@ export function periodActivity(
   start: string,
   end: string
 ): { debit: number; credit: number } {
-  let debit = 0;
-  let credit = 0;
+  // v4.1 T4: 整数分累加
+  let debitCents = 0;
+  let creditCents = 0;
   for (const e of entries) {
     if (e.date < start || e.date > end) continue;
-    if (e.debitAccountId === acc.id) debit += e.debitAmount;
-    if (e.creditAccountId === acc.id) credit += e.creditAmount;
+    if (e.debitAccountId === acc.id) debitCents += toCents(e.debitAmount);
+    if (e.creditAccountId === acc.id) creditCents += toCents(e.creditAmount);
   }
-  return { debit, credit };
+  return { debit: toDisplay(debitCents), credit: toDisplay(creditCents) };
 }
 
 /** 科目在 [start,end] 内的本期净发生额（收入为正、费用为正） */
