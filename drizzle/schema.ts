@@ -234,6 +234,7 @@ export const costEntries = sqliteTable("costEntries", {
   projectId: integer("projectId").notNull(),
   name: text("name", { length: 255 }).notNull(),
   amount: real("amount").notNull(),
+  amountCents: integer("amount_cents"), // v4.1 T4: 整数分, 与 amount 同步
   category: text("category", { length: 100 }).notNull(),
   notes: text("notes"),
   vendorId: integer("vendorId"),
@@ -260,6 +261,7 @@ export const revenueEntries = sqliteTable("revenueEntries", {
   projectId: integer("projectId").notNull(),
   name: text("name", { length: 255 }).notNull(),
   amount: real("amount").notNull(),
+  amountCents: integer("amount_cents"), // v4.1 T4: 整数分, 与 amount 同步
   category: text("category", { length: 100 }).notNull(),
   notes: text("notes"),
   customerId: integer("customerId"),
@@ -286,6 +288,7 @@ export const expenseEntries = sqliteTable("expenseEntries", {
   projectId: integer("projectId").notNull(),
   name: text("name", { length: 255 }).notNull(),
   amount: real("amount").notNull(),
+  amountCents: integer("amount_cents"), // v4.1 T4: 整数分, 与 amount 同步
   category: text("category", { length: 100 }).notNull(),
   notes: text("notes"),
   date: text("date")
@@ -354,8 +357,10 @@ export const journalEntries = sqliteTable("journalEntries", {
   description: text("description").notNull(),
   debitAccountId: integer("debitAccountId").notNull(),
   debitAmount: real("debitAmount").notNull(),
+  debitAmountCents: integer("debit_amount_cents"),
   creditAccountId: integer("creditAccountId").notNull(),
   creditAmount: real("creditAmount").notNull(),
+  creditAmountCents: integer("credit_amount_cents"),
   createdAt: text("createdAt")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
@@ -371,6 +376,7 @@ export const budgets = sqliteTable("budgets", {
   accountId: integer("accountId").notNull(),
   period: text("period").notNull(),
   amount: real("amount").notNull(),
+  amountCents: integer("amount_cents"), // v4.1 T4: 整数分, 与 amount 同步
   createdAt: text("createdAt").notNull().$defaultFn(() => new Date().toISOString()),
 }, (t) => ({ unq: unique().on(t.projectId, t.accountId, t.period) }));
 
@@ -382,6 +388,7 @@ export const closings = sqliteTable("closings", {
   approvedBy: integer("approvedBy"),
   approvedAt: text("approvedAt"),
   netIncome: real("netIncome").notNull(),
+  netIncomeCents: integer("net_income_cents"), // v4.1 T4
   entryCount: integer("entryCount").notNull(),
   summary: text("summary"),
   closedAt: text("closedAt").notNull(),

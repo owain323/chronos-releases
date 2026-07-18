@@ -5,7 +5,7 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import { BOT_INBOX_DIR, BOT_INBOX_TTL_MS, sanitizeFilename, MAX_FILE_SIZE } from "../storage";
-import { insertInboxItem } from "../../db/botInbox";
+import { insertInboxItem, listPendingInbox } from "../../db/botInbox";
 import { assertMagicByte, assertFileSize, assertInboxLimit } from "./media-validate";
 import { isTempBotUser, bindHint } from "./access";
 import { logger } from "../logger";
@@ -118,7 +118,6 @@ export async function handleBotMedia(
 
 /** 生成收件箱汇总回执 */
 export function buildInboxReply(botUserId: string): string {
-  const { listPendingInbox } = require("../../db/botInbox");
   const items = listPendingInbox(botUserId) as any[];
   if (items.length === 0) return "📥 没有待保存的文件。";
   const byType: Record<string, number> = {};
