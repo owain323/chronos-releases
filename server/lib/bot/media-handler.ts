@@ -91,8 +91,8 @@ export async function handleBotMedia(
   // 写临时文件
   fs.writeFileSync(tempPath, dl.buffer);
 
-  // magic-byte 校验
-  if (!assertMagicByte(tempPath, dl.contentType)) {
+  // magic-byte 校验 (传文件名用扩展名兜底)
+  if (!assertMagicByte(tempPath, originalName)) {
     try { fs.unlinkSync(tempPath); } catch { /* ignore */ }
     logger.warn({ ctx: "bot" }, `[media-handler] magic-byte rejected: ${originalName} (${dl.contentType})`);
     return `❌ 文件类型 ${dl.contentType} 不被允许或文件格式异常。`;

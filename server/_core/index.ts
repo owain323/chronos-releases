@@ -8,6 +8,7 @@ import crypto from "crypto";
 import rateLimit from "express-rate-limit";
 import multer from "multer";
 import { validateMagicByte } from "../lib/magic-byte";
+import { ALLOWED_EXT, ALLOWED_MIME } from "../lib/storage";
 import { createServer } from "http";
 import net from "net";
 import fs from "fs";
@@ -288,33 +289,9 @@ export async function createApp(): Promise<{
     storage,
     limits: { fileSize: 100 * 1024 * 1024 },
     fileFilter: (_req, file, cb) => {
-      const ALLOWED_EXT = [
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".gif",
-        ".webp",
-        ".pdf",
-        ".txt",
-        ".csv",
-        ".xlsx",
-        ".xls",
-      ];
       const ext = path.extname(file.originalname).toLowerCase();
       if (!ALLOWED_EXT.includes(ext))
         return cb(new Error(`后缀 ${ext} 不允许上传`));
-
-      const ALLOWED_MIME = [
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "image/webp",
-        "application/pdf",
-        "text/plain",
-        "text/csv",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "application/vnd.ms-excel",
-      ];
       if (ALLOWED_MIME.includes(file.mimetype)) return cb(null, true);
       cb(new Error(`文件类型 ${file.mimetype} 不允许上传`));
     },
@@ -360,17 +337,12 @@ export async function createApp(): Promise<{
         res.status(400).json({ error: "未选择文件" });
         return;
       }
-      // v3.9.2: magic-byte 二次校验, 拒绝伪造扩展名的文件
-      const head = Buffer.alloc(4);
+      // v3.9.2: magic-byte 二次校验, 拒绝伪造扩展名的文件 (v4.1: 扩至8字节+全类型白名单)
+      const head = Buffer.alloc(8);
       const fd = fs.openSync(req.file.path, "r");
-      fs.readSync(fd, head, 0, 4, 0);
+      fs.readSync(fd, head, 0, 8, 0);
       fs.closeSync(fd);
-      const realType = validateMagicByte(head, [
-        "image/png",
-        "image/jpeg",
-        "image/gif",
-        "application/pdf",
-      ]);
+      const realType = validateMagicByte(head, ALLOWED_MIME);
       if (!realType) {
         try {
           fs.unlinkSync(req.file.path);

@@ -2,19 +2,23 @@
 // magic-byte 二次校验 + 大小/类型白名单 + per-user 上限
 
 import { validateMagicByte } from "../../lib/magic-byte";
-import { ALLOWED_MIME, BOT_INBOX_MAX_COUNT, BOT_INBOX_MAX_TOTAL } from "../../lib/storage";
+import { ALLOWED_MIME, ALLOWED_EXT, BOT_INBOX_MAX_COUNT, BOT_INBOX_MAX_TOTAL } from "../../lib/storage";
 import { countPending, listPendingInbox } from "../../db/botInbox";
 import fs from "fs";
 import path from "path";
 
-/** 校验文件头 magic-byte (复用 server/lib/magic-byte.ts) */
-export function assertMagicByte(filePath: string, declaredMime: string): boolean {
+/** 校验文件类型 — magic-byte 为主, 扩展名兜底 (text/pdf/xlsx 等无固定magic) */
+export function assertMagicByte(filePath: string, originalName: string): boolean {
   try {
     const fd = fs.openSync(filePath, "r");
-    const head = Buffer.alloc(4);
-    fs.readSync(fd, head, 0, 4, 0);
+    const head = Buffer.alloc(8);
+    fs.readSync(fd, head, 0, 8, 0);
     fs.closeSync(fd);
-    return validateMagicByte(head, ALLOWED_MIME) !== null;
+    const magicResult = validateMagicByte(head, ALLOWED_MIME);
+    if (magicResult) return true;
+    // magic-byte 未识别 → 用扩展名兜底 (TXT/CSV/JSON/XML/MD/HTML 等文本文件无固定magic)
+    const ext = path.extname(originalName).toLowerCase();
+    return ALLOWED_EXT.includes(ext);
   } catch {
     return false;
   }

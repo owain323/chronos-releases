@@ -7,16 +7,40 @@ export const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(process.cwd(), "
 export const BOT_INBOX_DIR = "data/bot-inbox";
 
 export const ALLOWED_EXT = [
-  ".jpg", ".jpeg", ".png", ".gif", ".webp",
-  ".pdf", ".txt", ".csv", ".xlsx", ".xls",
+  // 图片
+  ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".ico", ".svg",
+  // 文档
+  ".pdf",
+  ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+  ".txt", ".csv", ".md", ".json", ".xml", ".html", ".htm",
+  // 压缩
+  ".zip", ".rar", ".7z", ".gz",
+  // 音视频 (机器人可接收)
+  ".mp3", ".wav", ".mp4", ".webm", ".avi", ".mov",
 ];
 
 export const ALLOWED_MIME = [
-  "image/jpeg", "image/png", "image/gif", "image/webp",
+  // 图片
+  "image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp",
+  "image/svg+xml", "image/vnd.microsoft.icon",
+  // 文档
   "application/pdf",
-  "text/plain", "text/csv",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  // 文本
+  "text/plain", "text/csv", "text/markdown",
+  "application/json", "application/xml", "text/xml",
+  "text/html",
+  // 压缩
+  "application/zip", "application/x-rar-compressed",
+  "application/x-7z-compressed", "application/gzip",
+  // 音视频
+  "audio/mpeg", "audio/wav", "video/mp4", "video/webm",
+  "video/x-msvideo", "video/quicktime",
 ];
 
 export const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
