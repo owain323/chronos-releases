@@ -25,11 +25,29 @@ async function downloadWecomMedia(mediaId: string): Promise<{ buffer: Buffer; co
       `https://qyapi.weixin.qq.com/cgi-bin/media/get?access_token=${token}&media_id=${mediaId}`,
       { signal: AbortSignal.timeout(30000) }
     );
-    if (!resp.ok) return null;
-    const contentType = resp.headers.get("content-type") || "application/octet-stream";
+    if (!resp.ok) {
+      logger.warn({ ctx: "bot" }, `[media] download HTTP ${resp.status}`);
+      return null;
+    }
+    // 归一化 Content-Type: 去 charset, 小写
+    const rawContentType = resp.headers.get("content-type") || "application/octet-stream";
+    const contentType = rawContentType.split(";")[0].trim().toLowerCase();
     const buffer = Buffer.from(await resp.arrayBuffer());
+
+    // 检测 WeChat API 错误: JSON { errcode: N, errmsg: "..." } (非 0 即失败)
+    if (contentType === "application/json" || buffer[0] === 0x7b) {
+      try {
+        const json = JSON.parse(buffer.toString("utf8"));
+        if (json.errcode && json.errcode !== 0) {
+          logger.warn({ ctx: "bot" }, `[media] WeChat API error: errcode=${json.errcode} msg=${json.errmsg}`);
+          return null;
+        }
+      } catch { /* not JSON, continue as binary */ }
+    }
+
     return { buffer, contentType };
-  } catch {
+  } catch (e) {
+    logger.warn({ ctx: "bot" }, `[media] download exception: ${e instanceof Error ? e.message : String(e)}`);
     return null;
   }
 }

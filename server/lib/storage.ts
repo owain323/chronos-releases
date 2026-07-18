@@ -66,7 +66,8 @@ export function isAllowedExt(filename: string): boolean {
   return ALLOWED_EXT.includes(ext);
 }
 
-/** 检查 MIME 是否在白名单 */
+/** 检查 MIME 是否在白名单 (v4.1: 自动去 charset 后缀+小写) */
 export function isAllowedMime(mime: string): boolean {
-  return ALLOWED_MIME.includes(mime);
+  const normalized = mime.split(";")[0].trim().toLowerCase();
+  return ALLOWED_MIME.includes(normalized);
 }
