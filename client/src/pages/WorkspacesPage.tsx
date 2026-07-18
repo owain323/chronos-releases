@@ -36,6 +36,8 @@ import {
   Shield,
   Loader2,
   Settings,
+  LogOut,
+  Trash2,
 } from "lucide-react";
 
 export default function WorkspacesPage() {
@@ -66,6 +68,22 @@ export default function WorkspacesPage() {
       toast.success("邀请已发送");
     },
     onError: e => toast.error(`邀请失败: ${e.message}`),
+  });
+
+  const deleteMutation = trpc.workspaces.delete.useMutation({
+    onSuccess: () => {
+      toast.success("工作区已删除");
+      refetch();
+    },
+    onError: e => toast.error(`删除失败: ${e.message}`),
+  });
+
+  const leaveMutation = trpc.workspaces.leave.useMutation({
+    onSuccess: () => {
+      toast.success("已离开工作区");
+      refetch();
+    },
+    onError: e => toast.error(`离开失败: ${e.message}`),
   });
 
   const [activeWs, setActiveWs] = useState<number | null>(null);
@@ -179,14 +197,44 @@ export default function WorkspacesPage() {
                           </p>
                         </div>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => navigate(`/workspaces/${w.id}/settings`)}
-                      >
-                        <Settings className="h-4 w-4 mr-1" />
-                        设置
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => navigate(`/workspaces/${w.id}/settings`)}
+                        >
+                          <Settings className="h-4 w-4 mr-1" />
+                          设置
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-orange-600 hover:text-orange-700"
+                          onClick={() => {
+                            if (confirm(`确定要离开工作区 "${w.name}" 吗？`)) {
+                              leaveMutation.mutate({ workspaceId: w.id });
+                            }
+                          }}
+                          disabled={leaveMutation.isPending}
+                        >
+                          <LogOut className="h-4 w-4 mr-1" />
+                          离开
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => {
+                            if (confirm(`确定要删除工作区 "${w.name}" 吗？此操作不可撤销！`)) {
+                              deleteMutation.mutate({ id: w.id });
+                            }
+                          }}
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          删除
+                        </Button>
+                      </div>
                     </div>
 
                     {/* 成员 */}

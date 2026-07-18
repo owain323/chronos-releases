@@ -3,7 +3,13 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, GripVertical } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus, GripVertical, MoreHorizontal, Edit2, Trash2 } from "lucide-react";
 import TaskDetailDrawer from "./TaskDetailDrawer";
 import { toast } from "sonner";
 import {
@@ -60,6 +66,22 @@ export default function KanbanBoard({ projectId }: KanbanBoardProps) {
       refetch();
     },
     onError: error => toast.error(error.message || "创建列失败"),
+  });
+
+  const updateColumn = trpc.kanban.updateColumn.useMutation({
+    onSuccess: () => {
+      toast.success("列已重命名");
+      refetch();
+    },
+    onError: error => toast.error(error.message || "重命名失败"),
+  });
+
+  const deleteColumn = trpc.kanban.deleteColumn.useMutation({
+    onSuccess: () => {
+      toast.success("列已删除");
+      refetch();
+    },
+    onError: error => toast.error(error.message || "删除失败"),
   });
 
   const utils = trpc.useUtils();
@@ -219,6 +241,9 @@ export default function KanbanBoard({ projectId }: KanbanBoardProps) {
               onDrop={handleDrop}
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
+              canEdit={true}
+              onRenameColumn={(id, name) => updateColumn.mutate({ id, name })}
+              onDeleteColumn={(id) => deleteColumn.mutate({ id })}
             />
           ))
         ) : (
@@ -256,6 +281,9 @@ interface KanbanColumnProps {
   onDrop: (e: React.DragEvent, columnId: number) => void;
   onDragStart: (e: React.DragEvent, taskId: number, columnId: number) => void;
   onDragEnd: () => void;
+  canEdit: boolean;
+  onRenameColumn: (id: number, name: string) => void;
+  onDeleteColumn: (id: number) => void;
 }
 
 function KanbanColumn({
@@ -271,6 +299,9 @@ function KanbanColumn({
   onDrop,
   onDragStart,
   onDragEnd,
+  canEdit,
+  onRenameColumn,
+  onDeleteColumn,
 }: KanbanColumnProps) {
   const { data: tasks, isLoading } = trpc.tasks.getByColumn.useQuery(
     { columnId: column.id },
@@ -341,6 +372,37 @@ function KanbanColumn({
               {tasks?.length || 0} 个任务
             </p>
           </div>
+          {canEdit && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    const newName = prompt("新列名称", column.name);
+                    if (newName && newName !== column.name) {
+                      onRenameColumn(column.id, newName);
+                    }
+                  }}
+                >
+                  <Edit2 className="h-3 w-3 mr-2" /> 重命名
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={() => {
+                    if (confirm(`确定删除列 "${column.name}" 吗？该列下的任务不会被删除。`)) {
+                      onDeleteColumn(column.id);
+                    }
+                  }}
+                >
+                  <Trash2 className="h-3 w-3 mr-2" /> 删除
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto space-y-2 pb-3 min-h-[100px]">

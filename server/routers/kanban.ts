@@ -24,4 +24,23 @@ export const kanbanRouter = router({
       await requireProjectAccess(ctx.user.id, input.projectId);
       return db.createKanbanColumn(input);
     }),
+
+  updateColumn: permissionProcedure("project.update")
+    .input(z.object({ id: z.number(), name: z.string().min(1).optional(), order: z.number().optional() }))
+    .mutation(async ({ input, ctx }) => {
+      const col = await db.getKanbanColumnById(input.id);
+      if (!col) throw new Error("Column not found");
+      await requireProjectAccess(ctx.user.id, col.projectId);
+      const { id, ...data } = input;
+      return db.updateKanbanColumn(id, data);
+    }),
+
+  deleteColumn: permissionProcedure("project.update")
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const col = await db.getKanbanColumnById(input.id);
+      if (!col) throw new Error("Column not found");
+      await requireProjectAccess(ctx.user.id, col.projectId);
+      return db.deleteKanbanColumn(input.id);
+    }),
 });

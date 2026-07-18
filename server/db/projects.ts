@@ -133,6 +133,30 @@ export async function createKanbanColumn(data: {
     .run();
 }
 
+export async function getKanbanColumnById(id: number) {
+  return db
+    .select()
+    .from(kanbanColumns)
+    .where(eq(kanbanColumns.id, id))
+    .get();
+}
+
+export async function updateKanbanColumn(id: number, data: { name?: string; order?: number }) {
+  return db
+    .update(kanbanColumns)
+    .set(data)
+    .where(eq(kanbanColumns.id, id))
+    .run();
+}
+
+export async function deleteKanbanColumn(id: number) {
+  // v3.9.2: 删列前先将该列下任务移入第一列(若有)或unassigned
+  return db
+    .delete(kanbanColumns)
+    .where(eq(kanbanColumns.id, id))
+    .run();
+}
+
 // Project members
 export async function getProjectMembers(projectId: number) {
   return db
