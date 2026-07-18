@@ -22,6 +22,7 @@ import * as db from "../../db";
 import { decryptWecom, parseWecomXml } from "./wecom-crypto";
 import { logger } from "../logger";
 import { assertBotProjectAccess, BotAccessDenied } from "./access";
+import { handleBotMedia, buildInboxReply } from "./media-handler";
 
 interface BotCallbackRequest {
   platform: "wecom" | "dingtalk";
@@ -119,10 +120,24 @@ export async function handleBotCallback(
         );
         const parsed = parseWecomXml(decrypted);
         text = parsed.Content || "";
-        // 企微：FromUserName=发消息企业, 真正的发送用户在 <UserID>
         _fromUser = parsed.FromUserName || "";
-        // 实际发送者从 From 或 UserID 字段拿
         platformUserId = parsed.UserID || parsed.FromUserName || "unknown";
+
+        // v4.0 T2: MsgType 媒体分支 (必须先于 text.trim() 检查)
+        const msgType = parsed.MsgType || "";
+        if (["image", "file", "voice", "video"].includes(msgType)) {
+          const mediaId = parsed.MediaId || "";
+          if (!mediaId) return { reply: "❌ 未收到文件，请重新发送。" };
+          const ctx = getOrCreateBotUser(req.platform, platformUserId);
+          const reply = await handleBotMedia(
+            { mediaId, msgType, originalName: parsed.FileName },
+            platformUserId,
+            ctx.chronosUserId,
+            ctx.currentProjectId // workspaceId via project association
+          );
+          if (reply) return { reply };
+          return { reply: buildInboxReply(platformUserId) };
+        }
       } catch {
         return { reply: "❌ 消息解密失败，请检查 EncodingAESKey 配置。" };
       }

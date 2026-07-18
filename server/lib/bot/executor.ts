@@ -21,6 +21,7 @@ import { handleAssign } from "./commands/assign";
 import { handleMy } from "./commands/my";
 import { handleRegister } from "./commands/register";
 import { handleLoginPassword } from "./commands/login";
+import { handleSave, handleInbox, handleDiscard } from "./commands/save";
 import { assertBotCommandAllowed, BotAccessDenied } from "./access";
 
 export interface CommandResult {
@@ -120,6 +121,15 @@ export async function executeCommand(
         break;
       case "help":
         reply = handleHelp(appUrl);
+        break;
+      case "save":
+        reply = await handleSave(userId, projectId, cmd.args || undefined);
+        break;
+      case "inbox":
+        reply = handleInbox(String(userId));
+        break;
+      case "discard":
+        reply = handleDiscard(String(userId), cmd.args === "yes");
         break;
       default:
         reply = "🤔 没看懂你的指令。\n\n试试 /help 查看全部命令。";

@@ -24,6 +24,9 @@ export interface ParsedCommand {
     | "register"
     | "login_pw" // 用户名+密码注册/登录
     | "help"
+    | "save"
+    | "inbox"
+    | "discard"
     | "unknown";
   args: string;
   taskId?: number;
@@ -165,6 +168,18 @@ export function parseCommand(text: string): ParsedCommand {
       args: "",
       taskId: parseInt(psMatch[3], 10),
     };
+
+  // v4.0 bot file ingest
+  if (/^(save|保存|落盘|fput)\s*$/i.test(clean)) return { action: "save", args: "" };
+  const saveMatch = clean.match(/^(save|保存|落盘|fput)\s+#?(\d+)\s*$/i);
+  if (saveMatch) return { action: "save", args: "", taskId: parseInt(saveMatch[2], 10) };
+  const saveNameMatch = clean.match(/^(save|保存|落盘|fput)\s+(.+?)\s*$/i);
+  if (saveNameMatch) return { action: "save", args: saveNameMatch[2].trim() };
+
+  if (/^(inbox|收件箱)\s*$/i.test(clean)) return { action: "inbox", args: "" };
+
+  if (/^(discard|清空收件箱|丢弃)\s*$/i.test(clean)) return { action: "discard", args: "" };
+  if (/^(discard|清空收件箱|丢弃)\s+yes\s*$/i.test(clean)) return { action: "discard", args: "yes" };
 
   return { action: "unknown", args: clean };
 }

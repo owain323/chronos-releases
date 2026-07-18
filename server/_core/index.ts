@@ -741,6 +741,17 @@ export async function startServer() {
   server.listen(port, () => {
     // logger.info(`Server running on // replaced by logger http://localhost:${port}/`);
     logger.info({ type: "startup", port, env: process.env.NODE_ENV });
+
+    // v4.0: bot inbox TTL cleanup
+    import("../db/botInbox").then(({ sweepExpiredInbox }) => {
+      const swept = sweepExpiredInbox();
+      if (swept > 0)
+        logger.info(`[bot-inbox] startup sweep: ${swept} expired files`);
+      setInterval(() => {
+        const s = sweepExpiredInbox();
+        if (s > 0) logger.info(`[bot-inbox] periodic sweep: ${s} expired`);
+      }, 60000);
+    });
     // Graceful shutdown
     const shutdown = async (signal: string) => {
       logger.info(`[shutdown] ${signal} received, closing...`);

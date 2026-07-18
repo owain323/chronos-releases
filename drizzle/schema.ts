@@ -626,5 +626,24 @@ export const aiExecutionLogs = sqliteTable("ai_execution_logs", {
 export type AIExecutionLog = typeof aiExecutionLogs.$inferSelect;
 export type InsertAIExecutionLog = typeof aiExecutionLogs.$inferInsert;
 
+// v4.0 bot_inbox — 机器人文件收件箱
+export const botInbox = sqliteTable("bot_inbox", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  botUserId: text("bot_user_id").notNull(),
+  webUserId: integer("web_user_id"),
+  workspaceId: integer("workspace_id"),
+  projectId: integer("project_id"),
+  originalName: text("original_name").notNull(),
+  mime: text("mime"),
+  size: integer("size"),
+  tempPath: text("temp_path").notNull(),
+  status: text("status").notNull().default("pending"),
+  receivedAt: integer("received_at").notNull(),
+  expiresAt: integer("expires_at").notNull(),
+  committedAt: integer("committed_at"),
+});
+export type BotInboxItem = typeof botInbox.$inferSelect;
+export type InsertBotInboxItem = typeof botInbox.$inferInsert;
+
 export { activityEvents, userSessions };
 export { featureFlags } from "../server/db/featureFlags";

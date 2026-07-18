@@ -52,6 +52,7 @@ const PROJECT_SCOPED_ACTIONS = new Set([
   "report",
   "import",
   "files",
+  "save",
   // project_switch 特殊处理：校验目标项目而非上下文项目，见下方分支
 ]);
 
