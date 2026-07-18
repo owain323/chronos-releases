@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CHRONOS - 机器人绑定</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #f5f7fa;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        padding: 40px;
+        max-width: 440px;
+        width: 100%;
+        text-align: center;
+      }
+      h1 {
+        font-size: 24px;
+        color: #1a1a2e;
+        margin-bottom: 8px;
+      }
+      p.desc {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+      .steps {
+        background: #f0f7ff;
+        border-radius: 8px;
+        padding: 16px;
+        text-align: left;
+        margin-bottom: 24px;
+      }
+      .steps li {
+        font-size: 14px;
+        color: #444;
+        margin: 8px 0;
+        padding-left: 4px;
+      }
+      .steps code {
+        background: #dbeafe;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+      button {
+        width: 100%;
+        padding: 14px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      button:hover {
+        background: #1d4ed8;
+      }
+      button:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+      }
+      .code-display {
+        margin-top: 24px;
+        background: #f0fdf4;
+        border: 2px solid #22c55e;
+        border-radius: 8px;
+        padding: 20px;
+      }
+      .code-display .label {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 8px;
+      }
+      .code-display .code {
+        font-size: 42px;
+        font-weight: 800;
+        letter-spacing: 8px;
+        color: #16a34a;
+        font-family: "Courier New", monospace;
+      }
+      .code-display .hint {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 8px;
+      }
+      .error {
+        color: #dc2626;
+        font-size: 14px;
+        margin-top: 12px;
+      }
+      .footer {
+        margin-top: 32px;
+        font-size: 12px;
+        color: #94a3b8;
+      }
+      .footer a {
+        color: #2563eb;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>🤖 CHRONOS 机器人绑定</h1>
+      <p class="desc">
+        生成验证码，在企微机器人中输入即可绑定你的 CHRONOS 账号
+      </p>
+
+      <ol class="steps">
+        <li>点击下方按钮生成 <code>6位验证码</code></li>
+        <li>在企微机器人对话中输入 <code>login 验证码</code></li>
+        <li>绑定成功后，机器人将以你的身份执行命令</li>
+      </ol>
+
+      <button id="generateBtn" onclick="generateCode()">
+        生成机器人绑定验证码
+      </button>
+
+      <div id="codeArea" style="display: none"></div>
+      <div id="errorMsg" class="error"></div>
+
+      <div class="footer">
+        完整功能请访问 <a href="/projects/1">CHRONOS 仪表盘</a>
+      </div>
+    </div>
+
+    <script>
+      async function generateCode() {
+        const btn = document.getElementById("generateBtn");
+        const area = document.getElementById("codeArea");
+        const err = document.getElementById("errorMsg");
+        btn.disabled = true;
+        btn.textContent = "生成中...";
+        err.textContent = "";
+        area.style.display = "none";
+
+        try {
+          const res = await fetch("/api/trpc/auth.generateBotCode?input={}", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          });
+          const data = await res.json();
+          if (data.result?.data?.json?.code) {
+            const code = data.result.data.json.code;
+            area.innerHTML = `<div class="code-display"><div class="label">你的验证码（5 分钟有效）</div><div class="code">${code}</div><div class="hint">在企微机器人中发送：<b>login ${code}</b></div></div>`;
+            area.style.display = "block";
+            btn.style.display = "none";
+          } else {
+            err.textContent = "生成失败，请确认已登录";
+          }
+        } catch (e) {
+          err.textContent = "网络错误：" + e.message;
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "重新生成";
+          btn.style.display = "block";
+        }
+      }
+    </script>
+  </body>
+</html>

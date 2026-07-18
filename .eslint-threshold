@@ -1,0 +1,7 @@
+// metric-guard 基线值
+// 锁死。改这个文件跟改源码一样需要 code review。
+module.exports = {
+  eslintThreshold: 218,    // 锁定值 (三审合一终态: 306→196→225→218)
+  maxTodos: 8,              // it.todo() 上限
+  lockedAt: "2026-07-17",
+};

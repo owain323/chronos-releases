@@ -1,0 +1,299 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --border: oklch(92% 0.03 260);
+    /* Sky Blue - Primary */
+    --color-sky-50: oklch(97.5% 0.05 220);
+    --color-sky-100: oklch(95% 0.08 220);
+    --color-sky-200: oklch(90% 0.12 220);
+    --color-sky-300: oklch(85% 0.15 220);
+    --color-sky-400: oklch(75% 0.18 220);
+    --color-sky-500: oklch(65% 0.2 220);
+    --color-sky-600: oklch(55% 0.22 220);
+    --color-sky-700: oklch(45% 0.24 220);
+
+    /* Cool Gray - Neutral */
+    --color-cool-50: oklch(98% 0.01 260);
+    --color-cool-100: oklch(96% 0.02 260);
+    --color-cool-200: oklch(92% 0.03 260);
+    --color-cool-300: oklch(88% 0.04 260);
+    --color-cool-400: oklch(80% 0.05 260);
+    --color-cool-500: oklch(70% 0.06 260);
+    --color-cool-600: oklch(55% 0.07 260);
+    --color-cool-700: oklch(40% 0.08 260);
+    --color-cool-800: oklch(25% 0.09 260);
+    --color-cool-900: oklch(15% 0.1 260);
+
+    /* Coral - Accent */
+    --color-coral-50: oklch(97% 0.08 30);
+    --color-coral-100: oklch(95% 0.12 30);
+    --color-coral-200: oklch(90% 0.15 30);
+    --color-coral-300: oklch(85% 0.18 30);
+    --color-coral-400: oklch(75% 0.22 30);
+    --color-coral-500: oklch(65% 0.25 30);
+    --color-coral-600: oklch(55% 0.28 30);
+
+    /* Semantic Colors - Light Theme */
+    --background: oklch(98% 0.01 260);
+    --foreground: oklch(15% 0.1 260);
+    --card: oklch(100% 0 0);
+    --card-foreground: oklch(15% 0.1 260);
+    --popover: oklch(100% 0 0);
+    --popover-foreground: oklch(15% 0.1 260);
+    --muted: oklch(88% 0.04 260);
+    --muted-foreground: oklch(55% 0.07 260);
+    --accent: oklch(65% 0.25 30);
+    --accent-foreground: oklch(100% 0 0);
+    --destructive: oklch(65% 0.25 30);
+    --destructive-foreground: oklch(100% 0 0);
+    --border: oklch(92% 0.03 260);
+    --input: oklch(96% 0.02 260);
+    --ring: oklch(65% 0.2 220);
+    --radius: 0.5rem;
+
+    /* Sidebar — 移动端侧边栏背景（之前未定义导致透明） */
+    --sidebar: oklch(100% 0 0);
+    --sidebar-foreground: oklch(15% 0.1 260);
+    --sidebar-accent: oklch(96% 0.02 260);
+    --sidebar-accent-foreground: oklch(15% 0.1 260);
+  }
+
+  .dark {
+    --background: oklch(15% 0.1 260);
+    --foreground: oklch(98% 0.01 260);
+    --card: oklch(25% 0.09 260);
+    --card-foreground: oklch(98% 0.01 260);
+    --popover: oklch(25% 0.09 260);
+    --popover-foreground: oklch(98% 0.01 260);
+    --muted: oklch(40% 0.08 260);
+    --muted-foreground: oklch(80% 0.05 260);
+    --accent: oklch(75% 0.22 30);
+    --accent-foreground: oklch(15% 0.1 260);
+    --destructive: oklch(75% 0.22 30);
+    --destructive-foreground: oklch(15% 0.1 260);
+    --border: oklch(40% 0.08 260);
+    --input: oklch(25% 0.09 260);
+    --ring: oklch(75% 0.18 220);
+  }
+
+  * {
+    /* border-color defaults to --border via CSS var */
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+    /* 安全区 — 适配 iPhone 刘海屏 / 底部横条 */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Custom flex defaults */
+  .flex {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  /* Container utility */
+  .container {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 80rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Smooth transitions */
+  @media (prefers-reduced-motion: no-preference) {
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    label,
+    p,
+    span,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    li,
+    td,
+    th {
+      transition-property: color;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: 200ms;
+    }
+  }
+}
+
+@layer components {
+  /* Button active state */
+  .btn-active:active {
+    transform: scale(0.95);
+    opacity: 0.9;
+  }
+
+  /* Focus ring utility */
+  .focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+
+  /* Smooth scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Google Fonts - 可选 */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap");
+
+body {
+  font-family: "Inter", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Poppins", sans-serif;
+}
+
+/* 搜索高亮动画 */
+.search-highlight {
+  animation: search-highlight-pulse 2s ease-out;
+  position: relative;
+}
+
+.search-highlight::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 3px solid oklch(65% 0.22 220);
+  opacity: 0;
+  animation: search-highlight-ring 2s ease-out;
+  pointer-events: none;
+  z-index: 1;
+  box-shadow: 0 0 12px oklch(65% 0.22 220 / 0.4);
+}
+
+@keyframes search-highlight-pulse {
+  0% {
+    background-color: oklch(65% 0.22 220 / 0.15);
+  }
+  30% {
+    background-color: oklch(65% 0.22 220 / 0.08);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes search-highlight-ring {
+  0% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 文件搜索行内高亮 — 不改变表格布局 */
+.file-search-highlight {
+  animation: file-search-highlight-pulse 2s ease-out;
+}
+
+@keyframes file-search-highlight-pulse {
+  0% {
+    background-color: oklch(65% 0.22 220 / 0.15);
+  }
+  30% {
+    background-color: oklch(65% 0.22 220 / 0.08);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* ===== 暗色模式全局覆盖 ===== */
+.dark {
+  color-scheme: dark;
+}
+.dark body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+.dark .bg-white {
+  background-color: #1e293b !important;
+}
+.dark .bg-gray-50 {
+  background-color: #0f172a !important;
+}
+.dark .bg-muted {
+  background-color: #1e293b !important;
+}
+.dark .text-gray-900 {
+  color: #f1f5f9 !important;
+}
+.dark .text-gray-700 {
+  color: #cbd5e1 !important;
+}
+.dark .text-gray-600 {
+  color: #94a3b8 !important;
+}
+.dark .text-gray-500 {
+  color: #64748b !important;
+}
+.dark .border-gray-200 {
+  border-color: #334155 !important;
+}
+.dark .border-b {
+  border-color: #334155 !important;
+}
+.dark .divide-gray-200 > * {
+  border-color: #334155 !important;
+}
+.dark input,
+.dark textarea {
+  background-color: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== 移动端全局修复 ===== */
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .overflow-x-auto-mobile {
+    overflow-x: auto;
+  }
+}

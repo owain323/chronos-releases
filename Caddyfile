@@ -1,0 +1,34 @@
+# CHRONOS Caddy reverse proxy —— 宿主机安装 Caddy 的拓扑
+# 适用: Caddy 直接运行在宿主机，CHRONOS 容器发布在 127.0.0.1:3006
+# （见 docker-compose.yml 的 ports 映射）。
+# Docker 一体化拓扑（compose 内含 caddy 服务）请使用 Caddyfile.docker。
+
+chronos.owain32380.cn {
+  # 修复: handle 块必须位于站点块内；原先写在顶层会被 Caddy 当作站点地址解析。
+  # 健康检查 (不记录日志)
+  handle /api/health {
+    reverse_proxy 127.0.0.1:3006
+    log {
+      output discard
+    }
+  }
+
+  handle {
+    reverse_proxy 127.0.0.1:3006
+  }
+
+  header {
+    X-Frame-Options "DENY"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    -Server
+    # Strict-Transport-Security for HTTPS
+    Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+  }
+
+  # 文件上传限制
+  request_body {
+    max_size 100MB
+  }
+}

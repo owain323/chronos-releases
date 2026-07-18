@@ -1,0 +1,25 @@
+# ============================================
+# CHRONOS Caddyfile (Docker 版)
+# 适用拓扑: caddy 服务与应用同在 docker-compose.yml 的默认网络，
+# 通过 compose 服务名 chronos 解析应用容器（container_name=chronos-app，
+# 服务名 chronos 与容器名均可解析，统一用服务名）。
+# ============================================
+chronos.owain32380.cn {
+	# API 路由 → app 容器
+	handle /api* {
+		reverse_proxy chronos:3006
+	}
+	# 短链接
+	handle /v/* {
+		reverse_proxy chronos:3006
+	}
+	# 上传文件
+	handle /uploads* {
+		reverse_proxy chronos:3006
+	}
+	# SPA 静态文件
+	handle {
+		reverse_proxy chronos:3006
+		encode gzip
+	}
+}

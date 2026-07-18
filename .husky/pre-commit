@@ -1,0 +1,3 @@
+#!/bin/sh
+# CHRONOS pre-commit — CI 对齐 + 指标防作弊
+npm run check && node scripts/metric-guard.cjs commit

@@ -1,0 +1,35 @@
+[Unit]
+Description=CHRONOS - Project Management Web App
+After=network.target
+
+[Service]
+Type=simple
+User=node
+WorkingDirectory=/opt/CHRONOS
+Environment=NODE_ENV=production
+Environment=PORT=3006
+# 修复: 旧值 file:./CHRONOS.db 与实际文件 chronos.db 大小写不一致，
+# Linux 下 SQLite 会静默创建并打开第二个空库。统一小写。
+Environment=DATABASE_URL=file:./chronos.db
+# 密钥与敏感配置集中放在 /etc/chronos/chronos.env（建议权限 0640 root:node），至少包含:
+#   JWT_SECRET=<强随机串>
+# 文件缺失时 systemd 直接拒绝启动（快速失败、日志明确），
+# 避免应用因缺 JWT_SECRET 反复 crash-loop。
+EnvironmentFile=/etc/chronos/chronos.env
+ExecStart=/usr/local/bin/node /opt/CHRONOS/dist/index.js
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+# ──── 安全加固 ────
+NoNewPrivileges=true
+ProtectSystem=strict
+PrivateTmp=true
+# ProtectSystem=strict 下仅放行应用目录（SQLite 库/WAL、backups/、uploads/）
+ReadWritePaths=/opt/CHRONOS
+LimitNOFILE=65536
+MemoryMax=1G
+
+[Install]
+WantedBy=multi-user.target
