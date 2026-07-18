@@ -7,6 +7,7 @@ import compression from "compression";
 import crypto from "crypto";
 import rateLimit from "express-rate-limit";
 import multer from "multer";
+import { validateMagicByte } from "../lib/magic-byte";
 import { createServer } from "http";
 import net from "net";
 import fs from "fs";
@@ -357,6 +358,18 @@ export async function createApp(): Promise<{
     try {
       if (!req.file) {
         res.status(400).json({ error: "未选择文件" });
+        return;
+      }
+      // v3.9.2: magic-byte 二次校验, 拒绝伪造扩展名的文件
+      const fsp = require("fs");
+      const head = Buffer.alloc(4);
+      const fd = fsp.openSync(req.file.path, "r");
+      fsp.readSync(fd, head, 0, 4, 0);
+      fsp.closeSync(fd);
+      const realType = validateMagicByte(head, ["image/png", "image/jpeg", "image/gif", "application/pdf"]);
+      if (!realType) {
+        try { fsp.unlinkSync(req.file.path); } catch { /* ignore */ }
+        res.status(400).json({ error: "文件类型不支持，仅允许 PNG/JPEG/GIF/PDF" });
         return;
       }
       const safeName = req.file.filename;

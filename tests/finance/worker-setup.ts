@@ -1,27 +1,21 @@
 /**
- * vitest per-worker 测试基建 (setupFiles) — 每 worker 独立 SQLite 数据库
+ * vitest per-test-file 测试基建 (setupFiles) — 每个测试文件独立 SQLite 数据库
  *
- * 为什么: 旧配置所有 worker 共享 file:./chronos.db + globalSetup 对同一文件
- * drizzle-kit push, 默认并行必现 WAL 锁竞争 (database is locked / 失败点漂移)。
- *
- * 机制:
- *  1. setupFiles 保证先于任何测试文件在本 worker 进程内执行, 因此在
- *     server/config.ts 读取 process.env 之前, 按 VITEST_POOL_ID 设置
- *     DATABASE_URL=file:./test-db-<poolId>.db —— 每个 worker 一个物理库。
- *  2. 用 drizzle/0000_happy_juggernaut.sql (覆盖全部 34 张表, 已核对与活体库
- *     一致) 幂等建 schema —— 比每 worker 起 drizzle-kit push 子进程快且无锁。
- *  3. 测试库文件由 vitest.global-setup.ts 在运行前后清理。
- *
- * 同一 worker 内的多个测试文件顺序复用同一库 (无并发), 建表用 marker 表
- * 探测保证幂等。测试绝不读写仓库根的 chronos.db。
+ * v3.9 flaky-gate 修复:
+ *  ① per-test-file DB 隔离 test-db-${poolId}-${fileId}.db (fileId 每次setupFiles 求值一次)
+ *  ② poolId fallback 由常量 "1" 改 ${process.pid}-${randomUUID().slice(0,8)}
+ *  ③ 迁移 SQL 保留 IF NOT EXISTS 防御
+ *  ④ global-setup 清理正则为 ^test-db-.*\.db
  */
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import Database from "better-sqlite3";
 
 const projectRoot = path.resolve(import.meta.dirname, "..", "..");
-const poolId = process.env.VITEST_POOL_ID || "1";
-const dbFile = path.join(projectRoot, `test-db-${poolId}.db`);
+const poolId = process.env.VITEST_POOL_ID || `${process.pid}-${crypto.randomUUID().slice(0, 8)}`;
+const fileId = crypto.randomUUID().slice(0, 8);
+const dbFile = path.join(projectRoot, `test-db-${poolId}-${fileId}.db`);
 
 // 必须先于任何 server/* 模块导入生效
 process.env.DATABASE_URL = `file:${dbFile}`;
@@ -36,7 +30,7 @@ function ensureSchema() {
         "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
       )
       .get();
-    if (marker) return; // 本 worker 库已初始化
+    if (marker) return;
     const sqlFile = path.join(
       projectRoot,
       "drizzle",

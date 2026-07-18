@@ -7,7 +7,8 @@ import fs from "fs";
 import path from "path";
 
 const projectRoot = import.meta.dirname;
-const TEST_DB_RE = /^test-db-\d+\.db(-wal|-shm|-journal)?$/;
+// v3.9 flaky-gate修复: 清理正则从 ^test-db-\d+ → ^test-db-.* 适配 pid-uuid 新命名
+const TEST_DB_RE = /^test-db-.*\.db(-wal|-shm|-journal)?$/;
 
 function cleanupTestDbs() {
   let removed = 0;

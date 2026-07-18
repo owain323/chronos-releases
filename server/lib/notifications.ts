@@ -7,6 +7,7 @@ import { eq, sql, and, desc, inArray } from "drizzle-orm";
 import {
   notifications,
   projects,
+  users,
   type InsertNotification,
 } from "../../drizzle/schema";
 import { db } from "../db/connection";
@@ -126,6 +127,17 @@ export function notify(
   link?: string
 ) {
   try {
+    // v3.9.2: 读取用户通知偏好, 未设默认允许(兼容)
+    const user = db.select({ notificationPrefs: users.notificationPrefs })
+      .from(users)
+      .where(eq(users.id, userId))
+      .get();
+    if (user?.notificationPrefs) {
+      try {
+        const prefs = JSON.parse(user.notificationPrefs as string);
+        if (prefs.notifications === false) return;
+      } catch { /* JSON解析失败, 默认允许 */ }
+    }
     createNotification({ projectId, userId, type, title, body, link });
   } catch (e) {
     logger.error({ ctx: "notify" }, "[Notify] write error:", e);

@@ -90,8 +90,8 @@ export async function requireProjectAccess(userId: number, projectId: number) {
     .get();
   if (!wsMember) {
     throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "You are not a member of this workspace",
+      code: "NOT_FOUND",  // v3.9.2: 403→404 消除信息泄露, 与bot侧口径一致
+      message: "Workspace not found",
     });
   }
 
@@ -126,9 +126,9 @@ export async function requireProjectAccess(userId: number, projectId: number) {
     return { workspaceRole: wsMember.role, projectRole: "viewer" };
   }
 
-  // 非项目成员 → 拒绝访问
+  // 非项目成员 → 拒绝访问 (NOT_FOUND 消除信息泄露)
   throw new TRPCError({
-    code: "FORBIDDEN",
-    message: "你没有访问该项目的权限",
+    code: "NOT_FOUND",
+    message: "Project not found",
   });
 }

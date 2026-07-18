@@ -198,8 +198,8 @@ sqlite.prepare = ((sqlStr: string): any => {
 
 const _rawDb = drizzle(sqlite);
 
-// v4.0: 全局 LIMIT 守护 — 无 .limit() 的 .all() 自动加 50，防止内存炸弹
-const DEFAULT_LIMIT = 50;
+// v4.0: 全局 LIMIT 守护 — 无 .limit() 的 .all() 打警告(不静默截断)
+// v3.9.2 W3修复: 去掉静默 LIMIT 50, 改为 console.warn 提示调用方显式传 limit
 const MAX_LIMIT = 500;
 
 function wrapWithLimitGuard(db: typeof _rawDb): typeof _rawDb {
@@ -223,16 +223,11 @@ function wrapWithLimitGuard(db: typeof _rawDb): typeof _rawDb {
               }
               if (p === "all") {
                 const origAll = obj.all;
-                const autoLimited = obj as any;
-                if (!hasLimit) {
-                  autoLimited._limitGuard = DEFAULT_LIMIT;
-                }
                 return (...a: any[]) => {
-                  // Auto-add limit if not already set
-                  const q = autoLimited._limitGuard
-                    ? obj.limit(DEFAULT_LIMIT)
-                    : obj;
-                  return (origAll || obj.all).call(q, ...a);
+                  if (!hasLimit) {
+                    console.warn("[DB] .all() called without .limit() — recommend explicit limit to avoid large result sets");
+                  }
+                  return (origAll || obj.all).call(obj, ...a);
                 };
               }
               const val = Reflect.get(obj, p, recv);
