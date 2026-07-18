@@ -126,6 +126,7 @@ export async function handleBotMedia(
   }
 
   // 插入 inbox — bot_user_id 用 chronosUserId (与 /save 查询一致)
+  const now = Date.now();
   insertInboxItem({
     botUserId: String(webUserId),
     webUserId,
