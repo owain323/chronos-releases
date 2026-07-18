@@ -6,6 +6,7 @@
 import { db, eq, and } from "./connection";
 import { botUserContext, botAuthCodes, users } from "../../drizzle/schema";
 import { upsertUser } from "./users";
+import crypto from "crypto";
 
 // ============================================================
 // 上下文管理
@@ -166,7 +167,8 @@ export function bindBotUser(
 
 /** 生成 6 位一次性验证码，5 分钟有效 */
 export function generateAuthCode(chronosUserId: number): string {
-  const code = String(Math.floor(100000 + Math.random() * 900000));
+  // v4.3 WO-SEC-4: crypto.randomInt 替代 Math.random, 防爆破
+  const code = String(crypto.randomInt(100000, 1000000));
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
   db.insert(botAuthCodes).values({ code, chronosUserId, expiresAt }).run();
   return code;

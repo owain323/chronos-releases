@@ -16,47 +16,84 @@ export function validateMagicByte(
   const head = buffer.slice(0, 8);
 
   // --- Images ---
-  if (head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4e && head[3] === 0x47)
+  if (
+    head[0] === 0x89 &&
+    head[1] === 0x50 &&
+    head[2] === 0x4e &&
+    head[3] === 0x47
+  )
     return "image/png";
   if (head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff)
     return "image/jpeg";
   if (head[0] === 0x47 && head[1] === 0x49 && head[2] === 0x46)
     return "image/gif";
-  if (head[0] === 0x52 && head[1] === 0x49 && head[2] === 0x46 && head[3] === 0x46)
+  if (
+    head[0] === 0x52 &&
+    head[1] === 0x49 &&
+    head[2] === 0x46 &&
+    head[3] === 0x46
+  )
     return "image/webp"; // RIFF....WEBP
-  if (head[0] === 0x42 && head[1] === 0x4d)
-    return "image/bmp";
+  if (head[0] === 0x42 && head[1] === 0x4d) return "image/bmp";
 
   // --- PDF ---
-  if (head[0] === 0x25 && head[1] === 0x50 && head[2] === 0x44 && head[3] === 0x46)
+  if (
+    head[0] === 0x25 &&
+    head[1] === 0x50 &&
+    head[2] === 0x44 &&
+    head[3] === 0x46
+  )
     return "application/pdf";
 
   // --- ZIP-based (DOCX, XLSX, PPTX, ODT, jar, apk) ---
-  if (head[0] === 0x50 && head[1] === 0x4b && head[2] === 0x03 && head[3] === 0x04)
+  if (
+    head[0] === 0x50 &&
+    head[1] === 0x4b &&
+    head[2] === 0x03 &&
+    head[3] === 0x04
+  )
     return "application/zip";
 
   // --- OLE2-based (DOC, XLS, PPT old) ---
-  if (head[0] === 0xd0 && head[1] === 0xcf && head[2] === 0x11 && head[3] === 0xe0)
+  if (
+    head[0] === 0xd0 &&
+    head[1] === 0xcf &&
+    head[2] === 0x11 &&
+    head[3] === 0xe0
+  )
     return "application/ole";
 
   // --- GZ ---
-  if (head[0] === 0x1f && head[1] === 0x8b)
-    return "application/gzip";
+  if (head[0] === 0x1f && head[1] === 0x8b) return "application/gzip";
 
   // --- RAR ---
-  if (head[0] === 0x52 && head[1] === 0x61 && head[2] === 0x72 && head[3] === 0x21)
+  if (
+    head[0] === 0x52 &&
+    head[1] === 0x61 &&
+    head[2] === 0x72 &&
+    head[3] === 0x21
+  )
     return "application/rar";
 
   // --- 7Z ---
-  if (head[0] === 0x37 && head[1] === 0x7a && head[2] === 0xbc && head[3] === 0xaf)
+  if (
+    head[0] === 0x37 &&
+    head[1] === 0x7a &&
+    head[2] === 0xbc &&
+    head[3] === 0xaf
+  )
     return "application/7z";
 
   // --- Audio/Video ---
   if (head[0] === 0x49 && head[1] === 0x44 && head[2] === 0x33)
     return "audio/mpeg"; // ID3
-  if (head[0] === 0xff && head[1] === 0xfb)
-    return "audio/mpeg"; // MPEG frame header
-  if (head[0] === 0x52 && head[1] === 0x49 && head[2] === 0x46 && head[3] === 0x46)
+  if (head[0] === 0xff && head[1] === 0xfb) return "audio/mpeg"; // MPEG frame header
+  if (
+    head[0] === 0x52 &&
+    head[1] === 0x49 &&
+    head[2] === 0x46 &&
+    head[3] === 0x46
+  )
     return "audio/wav"; // RIFF....WAVE (need to check offset 8-11)
   if (head[0] === 0x00 && head[1] === 0x00 && head[2] === 0x00)
     return "video/mp4"; // ftyp boxes often start with null

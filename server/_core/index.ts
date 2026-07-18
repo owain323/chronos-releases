@@ -375,6 +375,7 @@ export async function createApp(): Promise<{
   // Serve uploaded files — JWT only (file ownership check disabled for v3.9.1 to fix preview 404)
   // v3.9.1 hotfix: 用户反馈图片/PDF预览全坏, 简化为仅校验JWT
   // TODO v4.0: 恢复项目所有权校验, 但需先修 cookie sameSite + tokenVersion 路径
+  // v4.3 WO-SEC-3: /uploads 加文件所有权校验 (修复仅验JWT的越权)
   app.use(
     "/uploads",
     async (req, res, next) => {
@@ -385,6 +386,18 @@ export async function createApp(): Promise<{
       if (!token) return res.status(401).send("Unauthorized");
       const payload = verifyToken(token);
       if (!payload) return res.status(401).send("Token expired");
+
+      // 查找文件归属: /uploads/<name> → fileSnapshots.fileUrl
+      const urlPath = `/uploads${req.path}`;
+      try {
+        const { getFileByUrl } = await import("../db/files");
+        const f = await getFileByUrl(urlPath);
+        if (f && f.uploadedBy && f.uploadedBy !== payload.uid) {
+          return res.status(403).send("Forbidden");
+        }
+      } catch {
+        /* DB error → allow (degrade gracefully) */
+      }
       return next();
     },
     express.static(UPLOADS_DIR)

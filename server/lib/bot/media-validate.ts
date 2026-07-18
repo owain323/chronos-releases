@@ -2,13 +2,21 @@
 // magic-byte 二次校验 + 大小/类型白名单 + per-user 上限
 
 import { validateMagicByte } from "../../lib/magic-byte";
-import { ALLOWED_MIME, ALLOWED_EXT, BOT_INBOX_MAX_COUNT, BOT_INBOX_MAX_TOTAL } from "../../lib/storage";
+import {
+  ALLOWED_MIME,
+  ALLOWED_EXT,
+  BOT_INBOX_MAX_COUNT,
+  BOT_INBOX_MAX_TOTAL,
+} from "../../lib/storage";
 import { countPending, listPendingInbox } from "../../db/botInbox";
 import fs from "fs";
 import path from "path";
 
 /** 校验文件类型 — magic-byte 为主, 扩展名兜底 (text/pdf/xlsx 等无固定magic) */
-export function assertMagicByte(filePath: string, originalName: string): boolean {
+export function assertMagicByte(
+  filePath: string,
+  originalName: string
+): boolean {
   try {
     const fd = fs.openSync(filePath, "r");
     const head = Buffer.alloc(8);
@@ -25,7 +33,10 @@ export function assertMagicByte(filePath: string, originalName: string): boolean
 }
 
 /** 校验大小 (文件路径或直接字节数) */
-export function assertFileSize(filePathOrSize: string | number, maxSize = 25 * 1024 * 1024): boolean {
+export function assertFileSize(
+  filePathOrSize: string | number,
+  maxSize = 25 * 1024 * 1024
+): boolean {
   try {
     if (typeof filePathOrSize === "number") {
       return filePathOrSize <= maxSize;
@@ -38,10 +49,16 @@ export function assertFileSize(filePathOrSize: string | number, maxSize = 25 * 1
 }
 
 /** 校验 per-user 收件箱上限 (≤20 个 / ≤100MB) */
-export function assertInboxLimit(botUserId: string): { ok: boolean; message?: string } {
+export function assertInboxLimit(botUserId: string): {
+  ok: boolean;
+  message?: string;
+} {
   const count = countPending(botUserId);
   if (count >= BOT_INBOX_MAX_COUNT) {
-    return { ok: false, message: `收件箱已满 (${count}/${BOT_INBOX_MAX_COUNT})，请先 /save 或 /discard` };
+    return {
+      ok: false,
+      message: `收件箱已满 (${count}/${BOT_INBOX_MAX_COUNT})，请先 /save 或 /discard`,
+    };
   }
   const items = listPendingInbox(botUserId);
   const totalSize = items.reduce((sum, i) => sum + (i.size || 0), 0);

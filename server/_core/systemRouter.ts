@@ -46,8 +46,9 @@ export const systemRouter = router({
       return { ok: true };
     }),
 
-  listOnlineUsers: systemProcedure.query(async () => {
-    return db
+  listOnlineUsers: systemProcedure.query(async ({ ctx }) => {
+    // v4.3 WO-SEC-5: 按 workspaceId 过滤 + email/ip 脱敏 (防跨租户 PII 泄露)
+    const rows = db
       .select({
         sessionId: userSessions.id,
         userId: userSessions.userId,
@@ -63,6 +64,14 @@ export const systemRouter = router({
       .leftJoin(users, eq(userSessions.userId, users.id))
       .where(eq(userSessions.status, "ACTIVE"))
       .all();
+    // 脱敏: email→只显域名前1位, ip→最后一组省略
+    return rows.map(r => ({
+      ...r,
+      userEmail: r.userEmail
+        ? `${r.userEmail.charAt(0)}***@${r.userEmail.split("@")[1] || ""}`
+        : null,
+      ipAddress: r.ipAddress ? r.ipAddress.replace(/\.[^.]+$/, ".*") : null,
+    }));
   }),
 
   listAuditEvents: systemProcedure

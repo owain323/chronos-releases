@@ -1,14 +1,23 @@
 // server/lib/bot/commands/save.ts — /save /inbox /discard 命令 (v4.0 T5)
 import fs from "fs";
 import path from "path";
-import { listPendingInbox, markInboxCommitted, discardInbox, countPending } from "../../../db/botInbox";
+import {
+  listPendingInbox,
+  markInboxCommitted,
+  discardInbox,
+  countPending,
+} from "../../../db/botInbox";
 import { createFileSnapshot } from "../../../db/files";
 import { UPLOADS_DIR, generateSafeFileName } from "../../storage";
 import { assertBotProjectAccess, listAccessibleProjects } from "../access";
 import { notify } from "../../notifications";
 
 /** /save <项目名或#id> — 落盘所有pending到指定项目 */
-export async function handleSave(userId: number, currentProjectId: number, projectRef?: string): Promise<string> {
+export async function handleSave(
+  userId: number,
+  currentProjectId: number,
+  projectRef?: string
+): Promise<string> {
   const botUserId = String(userId);
   const items = listPendingInbox(botUserId);
   if (items.length === 0) return "📭 没有待保存的文件。";
@@ -48,7 +57,8 @@ export async function handleSave(userId: number, currentProjectId: number, proje
     try {
       const safeName = generateSafeFileName(item.originalName);
       const destPath = path.join(UPLOADS_DIR, safeName);
-      if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+      if (!fs.existsSync(UPLOADS_DIR))
+        fs.mkdirSync(UPLOADS_DIR, { recursive: true });
       fs.copyFileSync(item.tempPath, destPath);
       await createFileSnapshot({
         projectId,
@@ -60,7 +70,11 @@ export async function handleSave(userId: number, currentProjectId: number, proje
         uploadedBy: item.webUserId || 0,
       });
       markInboxCommitted(item.id);
-      try { fs.unlinkSync(item.tempPath); } catch { /* ignore */ }
+      try {
+        fs.unlinkSync(item.tempPath);
+      } catch {
+        /* ignore */
+      }
       saved++;
     } catch (e: any) {
       console.warn(`[save] failed for ${item.originalName}:`, e.message);
@@ -68,7 +82,13 @@ export async function handleSave(userId: number, currentProjectId: number, proje
   }
 
   // v4.1: 通知用户
-  notify(projectId, userId, "file_upload", `机器人保存 ${saved} 个文件`, `通过企微机器人保存到 #${projectId}`);
+  notify(
+    projectId,
+    userId,
+    "file_upload",
+    `机器人保存 ${saved} 个文件`,
+    `通过企微机器人保存到 #${projectId}`
+  );
 
   return `✅ 已保存 ${saved}/${items.length} 个文件到 #${projectId}。`;
 }
@@ -80,7 +100,10 @@ export function handleInbox(botUserId: string): string {
 
   const lines = [`📥 收件箱 (${items.length} 个待保存文件):`];
   for (const item of items) {
-    const remaining = Math.max(0, Math.round((item.expiresAt - Date.now()) / 60000));
+    const remaining = Math.max(
+      0,
+      Math.round((item.expiresAt - Date.now()) / 60000)
+    );
     const sizeStr = item.size ? `${(item.size / 1024).toFixed(1)}KB` : "未知";
     lines.push(`  ${item.originalName} (${sizeStr}, ${remaining}分钟后过期)`);
   }

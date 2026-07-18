@@ -20,6 +20,10 @@ export const workspaceProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (!ctx.workspaceId) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "未选择工作区" });
   }
+  // v4.3 WO-SEC-1: 二手校验 — 非成员拒绝
+  if (!ctx.workspaceRole) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "非工作区成员" });
+  }
   return next({ ctx });
 });
 

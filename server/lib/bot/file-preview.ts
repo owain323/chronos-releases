@@ -71,7 +71,7 @@ export function renderFilePreview(data: {
   <div class="header">
     <div>
       <div class="title">${esc(data.fileName)}</div>
-      <div class="meta">${sizeStr} · ${ext.toUpperCase()}${projectLabel}</div>
+      <div class="meta">${sizeStr} · ${esc(ext.toUpperCase())}${projectLabel}</div>
     </div>
     <div class="actions">
       <a class="btn btn-primary" href="${esc(safeUrl(data.fileUrl))}" download>⬇ 下载</a>

@@ -85,13 +85,59 @@ const FP_SELF_REPAIR = [
   `CREATE INDEX IF NOT EXISTS idx_bot_inbox_bot_user ON bot_inbox(bot_user_id, status)`,
   `CREATE INDEX IF NOT EXISTS idx_bot_inbox_expires ON bot_inbox(expires_at, status)`,
   // v4.1 T4: amount→integer cents columns (自修复, 与 real 列并存)
-  (() => { try { sqlite.exec("ALTER TABLE costEntries ADD COLUMN amount_cents INTEGER"); } catch { /* exists */ } })(),
-  (() => { try { sqlite.exec("ALTER TABLE revenueEntries ADD COLUMN amount_cents INTEGER"); } catch { /* exists */ } })(),
-  (() => { try { sqlite.exec("ALTER TABLE expenseEntries ADD COLUMN amount_cents INTEGER"); } catch { /* exists */ } })(),
-  (() => { try { sqlite.exec("ALTER TABLE journalEntries ADD COLUMN debit_amount_cents INTEGER"); } catch { /* exists */ } })(),
-  (() => { try { sqlite.exec("ALTER TABLE journalEntries ADD COLUMN credit_amount_cents INTEGER"); } catch { /* exists */ } })(),
-  (() => { try { sqlite.exec("ALTER TABLE budgets ADD COLUMN amount_cents INTEGER"); } catch { /* exists */ } })(),
-  (() => { try { sqlite.exec("ALTER TABLE closings ADD COLUMN net_income_cents INTEGER"); } catch { /* exists */ } })(),
+  (() => {
+    try {
+      sqlite.exec("ALTER TABLE costEntries ADD COLUMN amount_cents INTEGER");
+    } catch {
+      /* exists */
+    }
+  })(),
+  (() => {
+    try {
+      sqlite.exec("ALTER TABLE revenueEntries ADD COLUMN amount_cents INTEGER");
+    } catch {
+      /* exists */
+    }
+  })(),
+  (() => {
+    try {
+      sqlite.exec("ALTER TABLE expenseEntries ADD COLUMN amount_cents INTEGER");
+    } catch {
+      /* exists */
+    }
+  })(),
+  (() => {
+    try {
+      sqlite.exec(
+        "ALTER TABLE journalEntries ADD COLUMN debit_amount_cents INTEGER"
+      );
+    } catch {
+      /* exists */
+    }
+  })(),
+  (() => {
+    try {
+      sqlite.exec(
+        "ALTER TABLE journalEntries ADD COLUMN credit_amount_cents INTEGER"
+      );
+    } catch {
+      /* exists */
+    }
+  })(),
+  (() => {
+    try {
+      sqlite.exec("ALTER TABLE budgets ADD COLUMN amount_cents INTEGER");
+    } catch {
+      /* exists */
+    }
+  })(),
+  (() => {
+    try {
+      sqlite.exec("ALTER TABLE closings ADD COLUMN net_income_cents INTEGER");
+    } catch {
+      /* exists */
+    }
+  })(),
   // closings.approvedBy / approvedAt (四眼原则)
   (() => {
     try {

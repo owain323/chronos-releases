@@ -13,7 +13,7 @@
 - 文档据实：财务恒等式 13→10 条、单元测试 194→205、删除无法产出的"覆盖率 50%+"表述、表数量 34→31、项目结构与角色模型按代码现实重写；阈值"未抬高"表述更正为据实锁定史（306→196→225→218）
 - 安全死代码：删除 `systemRouter.ts` 残留的 `deployFile` tRPC procedure（随 `/api/admin/deploy-file` REST 端点一并清除，全仓 grep 确认 0 调用方），连带移除仅其使用的 `systemOwnerProcedure`
 
-## v3.9.0 (2026-07-18) — 安全加固 + 质量门升级（修复大会战定版，据实记录）
+## v4.3.0 (2026-07-18) — 安全加固 + 质量门升级（修复大会战定版，据实记录）
 - Bot 回调验签：钉钉回调 HMAC-SHA256 验签 + 1 小时防重放窗口，生产未配置 secret 时 fail-closed 拒绝处理；企微明文模式生产禁用（强制 EncodingAESKey 加密模式）；`/切换` 项目前统一 `assertBotProjectAccess` 鉴权（server/lib/bot/callback.ts、wecom-crypto.ts、access.ts）
 - 上传鉴权前置：`POST /api/upload` 先经 `uploadAuth` JWT 校验 + 按用户限流，再进 multer 解析（server/_core/index.ts）
 - 财务 RBAC 收紧：财务路由统一 `permissionProcedure("finance.view"/"finance.edit")` + `requireProjectAccess` 租户隔离，导入/结转写审计日志（server/routers/finance.ts、financial-reports.ts）

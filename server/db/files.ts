@@ -1,6 +1,15 @@
 import { db, eq } from "./connection";
 import { fileSnapshots } from "../../drizzle/schema";
 
+// v4.3 WO-SEC-3: 按 fileUrl 查找文件(用于 /uploads 所有权校验)
+export async function getFileByUrl(fileUrl: string) {
+  return db
+    .select()
+    .from(fileSnapshots)
+    .where(eq(fileSnapshots.fileUrl, fileUrl))
+    .get();
+}
+
 // File Snapshots
 export async function getFileSnapshotById(id: number) {
   const r = db

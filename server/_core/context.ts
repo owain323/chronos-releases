@@ -79,7 +79,7 @@ export async function createContext(
       const headerWsId = req.headers["x-workspace-id"];
       const cookieWsId = req.cookies?.workspaceId;
       const rawId = headerWsId || cookieWsId;
-      const workspaceId = rawId ? Number(rawId) : null;
+      let workspaceId = rawId ? Number(rawId) : null;
 
       // 验证用户在 workspace 中的成员身份 + 角色
       let workspaceRole: TrpcContext["workspaceRole"] = null;
@@ -97,12 +97,13 @@ export async function createContext(
           .get();
         if (member) {
           workspaceRole = member.role as TrpcContext["workspaceRole"];
+        } else {
+          // v4.3 WO-SEC-1: 非成员 → 清 workspaceId, 触发 fallback 到用户自己的工作区
+          workspaceId = null;
         }
       }
 
       // R8: workspaceId 缺失时自动 fallback 到用户第一个 workspace
-      // v3.9.2: 去掉生产环境抛错 — 手机/平板无 x-workspace-id header 会挡所有请求
-      // 多租户越权面由 permissions matrix + requireProjectAccess 在路由层兜底
       let finalWorkspaceId = workspaceId;
       if (!finalWorkspaceId) {
         console.warn(

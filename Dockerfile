@@ -20,8 +20,8 @@ RUN npx esbuild server/_core/index.ts \
 FROM node:22-alpine
 WORKDIR /app
 COPY package.json package-lock.json ./
-# 仅安装生产依赖（drizzle-kit 等 devDependency 不进运行时镜像）
-RUN npm ci --legacy-peer-deps --ignore-scripts --omit=dev
+# v4.3 WO-QA-3: 去 --ignore-scripts, better-sqlite3 需要原生编译
+RUN npm ci --legacy-peer-deps --omit=dev
 COPY --from=builder /build/dist ./dist
 COPY scripts/init-db.mjs ./scripts/init-db.mjs
 COPY scripts/backup-db.mjs ./scripts/backup-db.mjs

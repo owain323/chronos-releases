@@ -68,8 +68,16 @@ export const appRouter = router({
     getByColumn: protectedProcedure
       .input(z.object({ columnId: z.number() }))
       .query(async ({ input, ctx }) => {
-        // V35-16: columnId→projectId 需穿过 board 表, 当前 db 层已做 project JOIN 过滤
-        // 低风险: columnId 为内部路由用 ID, 不直接暴露给用户
+        // v4.3 WO-SEC-2: columnId→projectId→requireProjectAccess (原仅验登录, BOLA)
+        const { kanbanColumns } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        const col = db.db
+          ?.select({ projectId: kanbanColumns.projectId })
+          .from(kanbanColumns)
+          .where(eq(kanbanColumns.id, input.columnId))
+          .get();
+        if (!col) return [];
+        await requireProjectAccess(ctx.user.id, col.projectId);
         return db.getTasksByColumnId(input.columnId);
       }),
 

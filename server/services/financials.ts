@@ -60,7 +60,9 @@ export function accountBalance(
     if (e.debitAccountId === acc.id) debitCents += toCents(e.debitAmount);
     if (e.creditAccountId === acc.id) creditCents += toCents(e.creditAmount);
   }
-  const balance = isDebitIncrease(acc.type) ? debitCents - creditCents : creditCents - debitCents;
+  const balance = isDebitIncrease(acc.type)
+    ? debitCents - creditCents
+    : creditCents - debitCents;
   return toDisplay(balance);
 }
 
