@@ -22,8 +22,6 @@
     "verify:finance": "npx tsx scripts/verify-financial-reports.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.693.0",
-    "@aws-sdk/s3-request-presigner": "^3.693.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -78,7 +76,6 @@
     "exceljs": "^4.4.0",
     "express": "^4.21.2",
     "express-rate-limit": "^8.5.2",
-    "framer-motion": "^12.23.22",
     "helmet": "^8.2.0",
     "input-otp": "^1.4.2",
     "jose": "6.1.0",

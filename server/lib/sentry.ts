@@ -26,6 +26,18 @@ export async function initSentry(app: Express) {
       profilesSampleRate: 0.1,
       environment: process.env.NODE_ENV || "development",
       release: process.env.APP_VERSION || "unknown",
+      // v4.3 WO-SEC-5: 脱敏 Authorization/cookie/IP 防 PII 外传
+      beforeSend(event) {
+        if (event.request?.headers) {
+          delete event.request.headers["authorization"];
+          delete event.request.headers["cookie"];
+          delete event.request.headers["x-workspace-id"];
+        }
+        if (event.user?.ip_address) {
+          event.user.ip_address = "0.0.0.0";
+        }
+        return event;
+      },
     });
 
     sentryModule = Sentry;

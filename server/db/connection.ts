@@ -70,8 +70,13 @@ const FP_SELF_REPAIR = [
   (() => {
     try {
       sqlite.exec("ALTER TABLE accounts ADD COLUMN cashFlowCategory TEXT");
-    } catch {
-      /* 已存在 */
+    } catch (e: unknown) {
+      if (!String(e).includes("duplicate column")) {
+        logger.warn(
+          { ctx: "db" },
+          `[self-repair] ALTER accounts.cashFlowCategory failed: ${e instanceof Error ? e.message : String(e)}`
+        );
+      }
     }
   })(),
   // budgets 表
@@ -197,8 +202,17 @@ for (const ddl of FP_SELF_REPAIR) {
   if (typeof ddl === "string") {
     try {
       sqlite.exec(ddl);
-    } catch {
-      /* 已存在则忽略 */
+    } catch (e: unknown) {
+      // v4.3 WO-PROD-2: 区分预期"已存在"与其他错误
+      if (
+        !String(e).includes("already exists") &&
+        !String(e).includes("duplicate")
+      ) {
+        logger.warn(
+          { ctx: "db" },
+          `[self-repair] DDL failed: ${ddl.slice(0, 80)}... → ${e instanceof Error ? e.message : String(e)}`
+        );
+      }
     }
   }
 }
