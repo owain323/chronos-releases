@@ -4,7 +4,7 @@ import path from "path";
 import { listPendingInbox, markInboxCommitted, discardInbox, countPending } from "../../../db/botInbox";
 import { createFileSnapshot } from "../../../db/files";
 import { UPLOADS_DIR, generateSafeFileName } from "../../storage";
-import { assertBotProjectAccess } from "../access";
+import { assertBotProjectAccess, listAccessibleProjects } from "../access";
 import { notify } from "../../notifications";
 
 /** /save <项目名或#id> — 落盘所有pending到指定项目 */
@@ -16,9 +16,23 @@ export async function handleSave(userId: number, currentProjectId: number, proje
   // 解析项目
   let projectId = projectRef ? parseInt(projectRef, 10) : currentProjectId || 0;
   if (isNaN(projectId) && projectRef) {
-    // 按名称匹配
-    projectId = 0; // TODO full name-match (implement later with listAccessibleProjects)
-    return "⚠️ 按项目名称搜索暂不支持，请使用 /save #项目编号。";
+    // 按名称模糊匹配（复用 callback.ts switchNameMatch 模式）
+    const projects = await listAccessibleProjects(userId);
+    const nameMatch = projectRef.toLowerCase();
+    const candidates = projects.filter((p: any) =>
+      p.name.toLowerCase().includes(nameMatch)
+    );
+    if (candidates.length === 0) {
+      return `❌ 没找到名为 "${projectRef}" 的项目。`;
+    }
+    if (candidates.length === 1) {
+      projectId = candidates[0].id;
+    } else {
+      const list = candidates
+        .map((p: any) => `  #${p.id} ${p.name}`)
+        .join("\n");
+      return `⚠️ 有 ${candidates.length} 个匹配项目，请更精确指定：\n${list}\n\n如 /save #项目编号`;
+    }
   }
   if (!projectId) return "❌ 请指定项目（/save #编号）或先 /切换 项目。";
 
