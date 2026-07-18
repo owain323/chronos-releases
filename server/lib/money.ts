@@ -25,7 +25,7 @@ export function toDisplay(cents: number | null | undefined): number {
 
 /** 安全加(整数分) */
 export function addCents(...args: Array<number | string | null | undefined>): number {
-  return args.reduce((sum, a) => sum + toCents(a), 0);
+  return args.reduce((sum: number, a) => sum + toCents(a), 0);
 }
 
 /** 安全减 */
