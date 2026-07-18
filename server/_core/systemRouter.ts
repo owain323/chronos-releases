@@ -11,7 +11,7 @@ import { requireSystemAccess } from "../lib/system-access";
 import { db } from "../db/connection";
 import { userSessions } from "../db/userSessions";
 import { activityEvents } from "../db/activityEvents";
-import { users } from "../../drizzle/schema";
+import { users, workspaceMembers } from "../../drizzle/schema";
 
 const systemProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   await requireSystemAccess(ctx.user!.id, "SYSTEM_AUDITOR");
@@ -62,11 +62,27 @@ export const systemRouter = router({
       })
       .from(userSessions)
       .leftJoin(users, eq(userSessions.userId, users.id))
-      .where(eq(userSessions.status, "ACTIVE"))
+      .leftJoin(
+        workspaceMembers,
+        and(
+          eq(workspaceMembers.userId, users.id),
+          eq(workspaceMembers.workspaceId, ctx.workspaceId ?? 0)
+        )
+      )
+      .where(
+        and(
+          eq(userSessions.status, "ACTIVE"),
+          ctx.workspaceId
+            ? eq(workspaceMembers.workspaceId, ctx.workspaceId)
+            : undefined
+        )
+      )
       .all();
     // 脱敏: email→只显域名前1位, ip→最后一组省略
     return rows.map(r => ({
       ...r,
+      userName: r.userName ? r.userName.charAt(0) + "***" : null,
+      device: "***",
       userEmail: r.userEmail
         ? `${r.userEmail.charAt(0)}***@${r.userEmail.split("@")[1] || ""}`
         : null,

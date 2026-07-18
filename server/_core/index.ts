@@ -387,7 +387,7 @@ export async function createApp(): Promise<{
       const payload = verifyToken(token);
       if (!payload) return res.status(401).send("Token expired");
 
-      // 查找文件归属: /uploads/<name> → fileSnapshots.fileUrl
+      // v4.3 WO-SEC-1: catch 改为 fail-closed — DB异常不静默放行
       const urlPath = `/uploads${req.path}`;
       try {
         const { getFileByUrl } = await import("../db/files");
@@ -395,8 +395,12 @@ export async function createApp(): Promise<{
         if (f && f.uploadedBy && f.uploadedBy !== payload.uid) {
           return res.status(403).send("Forbidden");
         }
-      } catch {
-        /* DB error → allow (degrade gracefully) */
+      } catch (e) {
+        logger.warn(
+          { ctx: "uploads" },
+          `[SEC] getFileByUrl failed, denying access: ${e instanceof Error ? e.message : String(e)}`
+        );
+        return res.status(403).send("Forbidden");
       }
       return next();
     },
