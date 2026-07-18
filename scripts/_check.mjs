@@ -1,0 +1,12 @@
+import Database from "better-sqlite3";
+import fs from "fs";
+const db = new Database("chronos.db");
+const allFiles = fs.readdirSync("uploads");
+console.log("All files:", allFiles.length);
+const records = db.prepare("SELECT id, fileName, fileUrl, projectId FROM fileSnapshots").all();
+console.log("Records:", records.length);
+const recordUrls = new Set(records.map(r => r.fileUrl));
+const orphans = allFiles.filter(f => !recordUrls.has("/uploads/" + f));
+console.log("Orphans:", orphans);
+const haizhi = records.filter(r => r.fileName && r.fileName.includes("海之兴"));
+console.log("海之兴 records:", JSON.stringify(haizhi, null, 2));

@@ -3,6 +3,8 @@ import DOMPurify from "dompurify";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -18,6 +20,7 @@ import {
   HardDrive,
   Download,
   FileSpreadsheet,
+  Trash2,
 } from "lucide-react";
 
 interface PreviewFile {
@@ -47,6 +50,7 @@ export default function FilePreviewDialog({
   const [sheetData, setSheetData] = useState<
     { name: string; rows: unknown[][] }[]
   >([]);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   // 带 token 的文件 URL（/uploads 路由需鉴权）
   const fileUrl = file?.fileUrl?.startsWith("http")
@@ -57,6 +61,15 @@ export default function FilePreviewDialog({
 
   const updateNotes = trpc.files.updateNotes.useMutation({
     onSuccess: () => toast.success("备注已保存"),
+  });
+
+  const deleteFile = trpc.files.delete.useMutation({
+    onSuccess: () => {
+      toast.success("文件已删除");
+      setConfirmDelete(false);
+      onOpenChange(false);
+    },
+    onError: (e: any) => toast.error(e?.message || "删除失败"),
   });
 
   useEffect(() => {
@@ -270,7 +283,15 @@ export default function FilePreviewDialog({
           </TabsContent>
         </Tabs>
 
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-between items-center pt-2 border-t mt-2">
+          <Button
+            variant="outline"
+            className="gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+            onClick={() => setConfirmDelete(true)}
+            disabled={deleteFile.isPending}
+          >
+            <Trash2 className="w-4 h-4" /> 删除文件
+          </Button>
           <Button
             variant="outline"
             className="gap-2"
@@ -280,6 +301,38 @@ export default function FilePreviewDialog({
           </Button>
         </div>
       </DialogContent>
+
+      {/* 确认删除弹窗 */}
+      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-500" /> 确认删除
+            </DialogTitle>
+            <DialogDescription>
+              即将删除 <span className="font-semibold text-gray-900">{file.fileName}</span>，
+              此操作不可撤销，文件将从服务器永久删除。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDelete(false)}
+              disabled={deleteFile.isPending}
+            >
+              取消
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteFile.mutate({ id: file.id })}
+              disabled={deleteFile.isPending}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleteFile.isPending ? "删除中..." : "确认删除"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

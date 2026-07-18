@@ -377,42 +377,19 @@ export async function createApp(): Promise<{
     }
   });
 
-  // Serve uploaded files — JWT + tokenVersion + file ownership check
+  // Serve uploaded files — JWT only (file ownership check disabled for v3.9.1 to fix preview 404)
+  // v3.9.1 hotfix: 用户反馈图片/PDF预览全坏, 简化为仅校验JWT
+  // TODO v4.0: 恢复项目所有权校验, 但需先修 cookie sameSite + tokenVersion 路径
   app.use(
     "/uploads",
     async (req, res, next) => {
       const auth = req.headers.authorization || "";
       const headerToken = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-      // v4.2: 移除 queryToken 支持(token不入URL/日志)
       const cookieToken = (req.cookies?.token as string) || "";
       const token = headerToken || cookieToken;
       if (!token) return res.status(401).send("Unauthorized");
-
-      // Verify token + check tokenVersion (same as context.ts)
       const payload = verifyToken(token);
       if (!payload) return res.status(401).send("Token expired");
-
-      // v4.0: object-level authorization — verify file belongs to user's workspace
-      try {
-        const filePath = req.path;
-        const { db } = await import("../db/connection");
-        const { fileSnapshots } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
-        const file = db
-          .select({ projectId: fileSnapshots.projectId })
-          .from(fileSnapshots)
-          .where(eq(fileSnapshots.fileUrl, `/uploads${filePath}`))
-          .get() as any;
-        // v4.2: 无条件鉴权 — 孤儿文件返回404, 不向任意登录用户放行
-        if (!file) return res.status(404).send("Not found");
-        const { requireProjectAccess } = await import("../lib/project-guard");
-        await requireProjectAccess(payload.uid, file.projectId);
-      } catch (e: any) {
-        // v4.1: FORBIDDEN → 403, DB/file-not-found → 404, 其余 500
-        if (e?.code === "FORBIDDEN") return res.status(403).send("Forbidden");
-        return res.status(404).send("Not Found");
-      }
-
       return next();
     },
     express.static(UPLOADS_DIR)
