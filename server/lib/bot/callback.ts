@@ -136,9 +136,10 @@ export async function handleBotCallback(
             null // workspaceId resolved at /save time via project lookup
           );
           if (reply) return { reply };
-          return { reply: buildInboxReply(platformUserId) };
+          return { reply: buildInboxReply(String(ctx.chronosUserId)) };
         }
-      } catch {
+      } catch (e) {
+        logger.warn({ ctx: "bot" }, `[Bot] 企微解密失败: ${e instanceof Error ? e.message : String(e)} (token=${req.wecomToken?.slice(0,6)}... key=${req.encodingAESKey?.slice(0,6)}...)`);
         return { reply: "❌ 消息解密失败，请检查 EncodingAESKey 配置。" };
       }
     } else {
