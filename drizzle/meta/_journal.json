@@ -8,6 +8,20 @@
       "when": 1784291942443,
       "tag": "0000_happy_juggernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1784364000000,
+      "tag": "0001_bot_inbox",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1784370000000,
+      "tag": "0010_backfill_cents",
+      "breakpoints": true
     }
   ]
 }

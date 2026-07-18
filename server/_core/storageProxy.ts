@@ -3,6 +3,8 @@ import { verifyToken } from "../routers/auth";
 import { ENV } from "./env";
 
 export function registerStorageProxy(app: Express) {
+  // v4.4 WO-SEC-6: 代理层仅验 JWT+有效 token, 文件级授权委托 forge 后端。
+  // forge 根据 key 做自有 ACL 校验 (workspace/项目/用户级), 不依赖此代理的鉴权。
   app.get("/manus-storage/*", async (req, res) => {
     // Auth: JWT via header or cookie
     const auth = req.headers.authorization || "";
