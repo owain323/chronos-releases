@@ -5,6 +5,7 @@ import { listPendingInbox, markInboxCommitted, discardInbox, countPending } from
 import { createFileSnapshot } from "../../../db/files";
 import { UPLOADS_DIR, generateSafeFileName } from "../../storage";
 import { assertBotProjectAccess } from "../access";
+import { notify } from "../../notifications";
 
 /** /save <项目名或#id> — 落盘所有pending到指定项目 */
 export async function handleSave(userId: number, currentProjectId: number, projectRef?: string): Promise<string> {
@@ -51,6 +52,9 @@ export async function handleSave(userId: number, currentProjectId: number, proje
       console.warn(`[save] failed for ${item.originalName}:`, e.message);
     }
   }
+
+  // v4.1: 通知用户
+  notify(projectId, userId, "file_upload", `机器人保存 ${saved} 个文件`, `通过企微机器人保存到 #${projectId}`);
 
   return `✅ 已保存 ${saved}/${items.length} 个文件到 #${projectId}。`;
 }

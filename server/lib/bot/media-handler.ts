@@ -98,9 +98,18 @@ export async function handleBotMedia(
     return "❌ 文件超出大小限制（最大 100MB）。";
   }
 
-  // 文件名与 temp path
-  const ext = media.originalName ? path.extname(media.originalName) : ".bin";
-  const originalName = media.originalName || `${media.mediaId}${ext}`;
+  // 文件名与 temp path — 从 MIME 推断扩展名(企微 media_id无扩展名)
+  const mimeToExt: Record<string, string> = {
+    "image/jpeg": ".jpg", "image/png": ".png", "image/gif": ".gif",
+    "image/webp": ".webp", "image/bmp": ".bmp",
+    "application/pdf": ".pdf", "application/zip": ".zip",
+    "text/plain": ".txt", "text/csv": ".csv",
+  };
+  const basename = media.originalName || `${media.mediaId}`;
+  const ext = path.extname(basename) !== ".bin" && path.extname(basename).length > 1
+    ? path.extname(basename)
+    : (mimeToExt[dl.contentType] || ".bin");
+  const originalName = path.basename(basename, path.extname(basename)) + ext;
   const inboxDir = path.resolve(BOT_INBOX_DIR);
   if (!fs.existsSync(inboxDir)) fs.mkdirSync(inboxDir, { recursive: true });
   const tempName = crypto.randomUUID();
@@ -116,10 +125,9 @@ export async function handleBotMedia(
     return `❌ 文件类型 ${dl.contentType} 不被允许或文件格式异常。`;
   }
 
-  // 插入 inbox
-  const now = Date.now();
+  // 插入 inbox — bot_user_id 用 chronosUserId (与 /save 查询一致)
   insertInboxItem({
-    botUserId: platformUserId,
+    botUserId: String(webUserId),
     webUserId,
     workspaceId: workspaceId ?? undefined,
     originalName: sanitizeFilename(originalName),
