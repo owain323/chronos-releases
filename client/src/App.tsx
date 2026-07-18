@@ -18,6 +18,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import TopNavBar from "./components/TopNavBar";
 import SearchResults from "./pages/SearchResults";
+import SystemAudit from "./pages/SystemAudit";
+import SystemOnlineUsers from "./pages/SystemOnlineUsers";
 import { CommandMenu } from "./components/CommandMenu";
 import React, { Suspense } from "react";
 
@@ -211,6 +213,20 @@ function Router() {
             {() => (
               <AdminGuard>
                 <AuditPage />
+              </AdminGuard>
+            )}
+          </Route>
+          <Route path={"/system/audit"}>
+            {() => (
+              <AdminGuard>
+                <SystemAudit />
+              </AdminGuard>
+            )}
+          </Route>
+          <Route path={"/system/online-users"}>
+            {() => (
+              <AdminGuard>
+                <SystemOnlineUsers />
               </AdminGuard>
             )}
           </Route>
