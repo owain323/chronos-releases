@@ -20,10 +20,13 @@ export function assertMagicByte(filePath: string, declaredMime: string): boolean
   }
 }
 
-/** 校验大小上限 (≤25MB 硬上限) */
-export function assertFileSize(filePath: string, maxSize = 25 * 1024 * 1024): boolean {
+/** 校验大小 (文件路径或直接字节数) */
+export function assertFileSize(filePathOrSize: string | number, maxSize = 25 * 1024 * 1024): boolean {
   try {
-    const stat = fs.statSync(filePath);
+    if (typeof filePathOrSize === "number") {
+      return filePathOrSize <= maxSize;
+    }
+    const stat = fs.statSync(filePathOrSize);
     return stat.size <= maxSize;
   } catch {
     return false;

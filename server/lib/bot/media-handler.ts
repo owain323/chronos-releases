@@ -76,7 +76,7 @@ export async function handleBotMedia(
   if (!dl) return "❌ 媒体文件下载失败，请稍后重试。";
 
   // 大小校验
-  if (!assertFileSize(dl.buffer.length.toString(), MAX_FILE_SIZE)) {
+  if (!assertFileSize(dl.buffer.length, MAX_FILE_SIZE)) {
     return "❌ 文件超出大小限制（最大 100MB）。";
   }
 
