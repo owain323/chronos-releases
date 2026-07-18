@@ -225,7 +225,9 @@ function wrapWithLimitGuard(db: typeof _rawDb): typeof _rawDb {
                 const origAll = obj.all;
                 return (...a: any[]) => {
                   if (!hasLimit) {
-                    console.warn("[DB] .all() called without .limit() — recommend explicit limit to avoid large result sets");
+                    console.warn(
+                      "[DB] .all() called without .limit() — recommend explicit limit to avoid large result sets"
+                    );
                   }
                   return (origAll || obj.all).call(obj, ...a);
                 };

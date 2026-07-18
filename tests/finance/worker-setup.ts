@@ -13,7 +13,9 @@ import crypto from "crypto";
 import Database from "better-sqlite3";
 
 const projectRoot = path.resolve(import.meta.dirname, "..", "..");
-const poolId = process.env.VITEST_POOL_ID || `${process.pid}-${crypto.randomUUID().slice(0, 8)}`;
+const poolId =
+  process.env.VITEST_POOL_ID ||
+  `${process.pid}-${crypto.randomUUID().slice(0, 8)}`;
 const fileId = crypto.randomUUID().slice(0, 8);
 const dbFile = path.join(projectRoot, `test-db-${poolId}-${fileId}.db`);
 

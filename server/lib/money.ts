@@ -24,17 +24,25 @@ export function toDisplay(cents: number | null | undefined): number {
 }
 
 /** 安全加(整数分) */
-export function addCents(...args: Array<number | string | null | undefined>): number {
+export function addCents(
+  ...args: Array<number | string | null | undefined>
+): number {
   return args.reduce((sum: number, a) => sum + toCents(a), 0);
 }
 
 /** 安全减 */
-export function subCents(a: number | string | null | undefined, b: number | string | null | undefined): number {
+export function subCents(
+  a: number | string | null | undefined,
+  b: number | string | null | undefined
+): number {
   return toCents(a) - toCents(b);
 }
 
 /** 格式化货币显示 */
-export function fmtCents(cents: number | null | undefined, currency = "¥"): string {
+export function fmtCents(
+  cents: number | null | undefined,
+  currency = "¥"
+): string {
   const v = toDisplay(cents);
   return `${currency}${v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
 }

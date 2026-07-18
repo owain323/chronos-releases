@@ -90,7 +90,7 @@ export async function requireProjectAccess(userId: number, projectId: number) {
     .get();
   if (!wsMember) {
     throw new TRPCError({
-      code: "NOT_FOUND",  // v3.9.2: 403→404 消除信息泄露, 与bot侧口径一致
+      code: "NOT_FOUND", // v3.9.2: 403→404 消除信息泄露, 与bot侧口径一致
       message: "Workspace not found",
     });
   }

@@ -9,7 +9,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, GripVertical, MoreHorizontal, Edit2, Trash2 } from "lucide-react";
+import {
+  Plus,
+  GripVertical,
+  MoreHorizontal,
+  Edit2,
+  Trash2,
+} from "lucide-react";
 import TaskDetailDrawer from "./TaskDetailDrawer";
 import { toast } from "sonner";
 import {
@@ -243,7 +249,7 @@ export default function KanbanBoard({ projectId }: KanbanBoardProps) {
               onDragEnd={handleDragEnd}
               canEdit={true}
               onRenameColumn={(id, name) => updateColumn.mutate({ id, name })}
-              onDeleteColumn={(id) => deleteColumn.mutate({ id })}
+              onDeleteColumn={id => deleteColumn.mutate({ id })}
             />
           ))
         ) : (
@@ -393,7 +399,11 @@ function KanbanColumn({
                 <DropdownMenuItem
                   className="text-red-600"
                   onClick={() => {
-                    if (confirm(`确定删除列 "${column.name}" 吗？该列下的任务不会被删除。`)) {
+                    if (
+                      confirm(
+                        `确定删除列 "${column.name}" 吗？该列下的任务不会被删除。`
+                      )
+                    ) {
                       onDeleteColumn(column.id);
                     }
                   }}

@@ -38,7 +38,7 @@ export function createSecurityHeadersMiddleware(): RequestHandler {
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "blob:"],
         frameSrc: ["'self'"],
-        frameAncestors: ["'self'"],  // v3.9.2: 允许同域PDF预览iframe
+        frameAncestors: ["'self'"], // v3.9.2: 允许同域PDF预览iframe
         formAction: ["'self'"],
         objectSrc: ["'none'"],
         connectSrc: [

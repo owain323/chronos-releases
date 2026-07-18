@@ -201,7 +201,9 @@ export default function WorkspacesPage() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => navigate(`/workspaces/${w.id}/settings`)}
+                          onClick={() =>
+                            navigate(`/workspaces/${w.id}/settings`)
+                          }
                         >
                           <Settings className="h-4 w-4 mr-1" />
                           设置
@@ -225,7 +227,11 @@ export default function WorkspacesPage() {
                           variant="ghost"
                           className="text-red-600 hover:text-red-700"
                           onClick={() => {
-                            if (confirm(`确定要删除工作区 "${w.name}" 吗？此操作不可撤销！`)) {
+                            if (
+                              confirm(
+                                `确定要删除工作区 "${w.name}" 吗？此操作不可撤销！`
+                              )
+                            ) {
                               deleteMutation.mutate({ id: w.id });
                             }
                           }}

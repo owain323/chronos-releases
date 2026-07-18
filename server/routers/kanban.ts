@@ -26,7 +26,13 @@ export const kanbanRouter = router({
     }),
 
   updateColumn: permissionProcedure("project.update")
-    .input(z.object({ id: z.number(), name: z.string().min(1).optional(), order: z.number().optional() }))
+    .input(
+      z.object({
+        id: z.number(),
+        name: z.string().min(1).optional(),
+        order: z.number().optional(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       const col = await db.getKanbanColumnById(input.id);
       if (!col) throw new Error("Column not found");

@@ -310,8 +310,11 @@ export default function FilePreviewDialog({
               <Trash2 className="w-5 h-5 text-red-500" /> 确认删除
             </DialogTitle>
             <DialogDescription>
-              即将删除 <span className="font-semibold text-gray-900">{file.fileName}</span>，
-              此操作不可撤销，文件将从服务器永久删除。
+              即将删除{" "}
+              <span className="font-semibold text-gray-900">
+                {file.fileName}
+              </span>
+              ， 此操作不可撤销，文件将从服务器永久删除。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">

@@ -9,7 +9,10 @@ type MemberInfo = {
   workspaceId?: number;
 };
 
-export async function getWorkspaceMembership(workspaceId: number, userId: number) {
+export async function getWorkspaceMembership(
+  workspaceId: number,
+  userId: number
+) {
   const members = await getWorkspaceMembers(workspaceId);
   const member = members.find((m: MemberInfo) => m.userId === userId);
   return { members, member };

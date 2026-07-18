@@ -128,7 +128,8 @@ export function notify(
 ) {
   try {
     // v3.9.2: 读取用户通知偏好, 未设默认允许(兼容)
-    const user = db.select({ notificationPrefs: users.notificationPrefs })
+    const user = db
+      .select({ notificationPrefs: users.notificationPrefs })
       .from(users)
       .where(eq(users.id, userId))
       .get();
@@ -136,7 +137,9 @@ export function notify(
       try {
         const prefs = JSON.parse(user.notificationPrefs as string);
         if (prefs.notifications === false) return;
-      } catch { /* JSON解析失败, 默认允许 */ }
+      } catch {
+        /* JSON解析失败, 默认允许 */
+      }
     }
     createNotification({ projectId, userId, type, title, body, link });
   } catch (e) {
