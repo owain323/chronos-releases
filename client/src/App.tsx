@@ -12,6 +12,8 @@ import Forbidden from "@/pages/Forbidden";
 import ServerError from "@/pages/ServerError";
 import Settings from "@/pages/Settings";
 import CalendarPage from "@/pages/CalendarPage";
+import { BenchmarkLibraryPage } from "@/pages/BenchmarkLibrary";
+import { BenchmarkDetailPage } from "@/pages/BenchmarkDetail";
 import { AdminGuard, AuthGuard } from "@/components/AuthGuard";
 import { Route, Switch, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -190,6 +192,22 @@ function Router() {
             {() => (
               <Protected>
                 <SearchResults />
+              </Protected>
+            )}
+          </Route>
+
+          {/* v4.4: 标杆库 */}
+          <Route path={"/benchmark"}>
+            {() => (
+              <Protected>
+                <BenchmarkLibraryPage />
+              </Protected>
+            )}
+          </Route>
+          <Route path={"/benchmark/:id"}>
+            {params => (
+              <Protected>
+                <BenchmarkDetailPage />
               </Protected>
             )}
           </Route>

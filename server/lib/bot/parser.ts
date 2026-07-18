@@ -27,6 +27,8 @@ export interface ParsedCommand {
     | "save"
     | "inbox"
     | "discard"
+    | "benchmark_list" // v4.4: 标杆列表
+    | "benchmark_compare" // v4.4: 对标
     | "unknown";
   args: string;
   taskId?: number;
@@ -184,6 +186,14 @@ export function parseCommand(text: string): ParsedCommand {
     return { action: "discard", args: "" };
   if (/^(discard|清空收件箱|丢弃)\s+yes\s*$/i.test(clean))
     return { action: "discard", args: "yes" };
+
+  // v4.4 WO-BOT-1: benchmark 命令
+  const blMatch = clean.match(
+    /^(?:标杆列表|对标列表|!标杆列表|!对标列表)\s*(.*)/i
+  );
+  if (blMatch) return { action: "benchmark_list", args: blMatch[1].trim() };
+  const bcMatch = clean.match(/^(?:对标|!对标)\s+(.+)/i);
+  if (bcMatch) return { action: "benchmark_compare", args: bcMatch[1].trim() };
 
   return { action: "unknown", args: clean };
 }

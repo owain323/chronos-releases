@@ -1,0 +1,15 @@
+# CHRONOS Benchmark Intelligence — 爬虫目标配置 (v4.4)
+# 用法: python scripts/crawler/benchmark_crawler.py --targets targets.csv
+# 字段说明:
+#   entity      — 实体标识（英文，用于目录命名）
+#   name        — 标准名称（中英文均可）
+#   ticker      — 股票代码（akshare 格式: 上交所如 600519, 深交所如 000001, 港股如 00700, 美股如 AAPL）
+#   market      — A(沪深) / H(港股) / US(美股) / ADR
+#   years       — 爬取财年，逗号分隔
+#   source_pref — 数据源偏好: akshare / eastmoney / manual
+#   gics_group  — GICS行业组
+entity,name,ticker,market,years,source_pref,gics_group
+apple,Apple Inc.,AAPL,US,"2022,2023,2024",akshare,Information Technology
+microsoft,Microsoft Corp.,MSFT,US,"2022,2023,2024",akshare,Information Technology
+maotai,贵州茅台,600519,A,"2022,2023,2024",akshare,Consumer Staples
+tencent,腾讯控股,00700,H,"2022,2023,2024",akshare,Communication Services

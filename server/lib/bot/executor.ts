@@ -131,6 +131,12 @@ export async function executeCommand(
       case "discard":
         reply = handleDiscard(String(userId), cmd.args === "yes");
         break;
+      case "benchmark_list":
+        reply = await handleBenchmarkList(cmd.args);
+        break;
+      case "benchmark_compare":
+        reply = await handleBenchmarkCompare(cmd.args);
+        break;
       default:
         reply = "🤔 没看懂你的指令。\n\n试试 /help 查看全部命令。";
     }
@@ -144,4 +150,91 @@ export async function executeCommand(
     console.error("[Bot] Command error:", err);
     return { reply: `❌ 执行出错：${err.message || "未知错误"}` };
   }
+}
+
+// v4.4 WO-BOT-1: !标杆列表 — 列出 benchmark 实体
+async function handleBenchmarkList(industry?: string): Promise<string> {
+  const { db } = await import("../../db/connection");
+  const { benchmarkEntities } = await import("../../db/schema-benchmark");
+  const { like, eq } = await import("drizzle-orm");
+
+  const rows = industry
+    ? db
+        .select()
+        .from(benchmarkEntities)
+        .where(eq(benchmarkEntities.gicsGroup, industry))
+        .limit(10)
+        .all()
+    : db.select().from(benchmarkEntities).limit(10).all();
+
+  if (!rows.length) return "📊 标杆库暂无数据，请先导入";
+
+  const lines = rows.map(
+    r =>
+      `• ${r.name}${r.ticker ? ` (${r.ticker})` : ""} [${r.gicsGroup}${r.market ? `・${r.market}` : ""}]`
+  );
+  return `📊 标杆库${industry ? ` [${industry}]` : ""}\n${lines.join("\n")}`;
+}
+
+// v4.4 WO-BOT-1: !对标 — 实体名 → 行业基线对比
+async function handleBenchmarkCompare(name: string): Promise<string> {
+  if (!name) return "用法: !对标 <实体名>\n例: !对标 贵州茅台";
+
+  const { db } = await import("../../db/connection");
+  const { eq, and } = await import("drizzle-orm");
+  const {
+    benchmarkEntities,
+    benchmarkPeriods,
+    benchmarkMetrics,
+    benchmarkIndustryBaseline,
+  } = await import("../../db/schema-benchmark");
+
+  const entity = db
+    .select()
+    .from(benchmarkEntities)
+    .where(eq(benchmarkEntities.name, name))
+    .get();
+  if (!entity) return `❌ 未找到实体: ${name}`;
+
+  const period = db
+    .select()
+    .from(benchmarkPeriods)
+    .where(eq(benchmarkPeriods.entityId, entity.id))
+    .orderBy((await import("drizzle-orm")).desc(benchmarkPeriods.fiscalYear))
+    .limit(1)
+    .get();
+  if (!period) return `📊 ${name} 暂无数据`;
+
+  const metrics = db
+    .select()
+    .from(benchmarkMetrics)
+    .where(eq(benchmarkMetrics.periodId, period.id))
+    .all()
+    .slice(0, 5);
+
+  const baselines = db
+    .select()
+    .from(benchmarkIndustryBaseline)
+    .where(
+      and(
+        eq(benchmarkIndustryBaseline.gicsGroup, entity.gicsGroup),
+        eq(benchmarkIndustryBaseline.periodType, "FY")
+      )
+    )
+    .all();
+
+  const baselineMap = new Map(baselines.map(b => [b.metricKey, b]));
+  const lines = metrics.map(m => {
+    const bl = baselineMap.get(m.metricKey);
+    const conf =
+      m.confidence != null
+        ? ` ${m.confidence >= 0.9 ? "●" : m.confidence >= 0.7 ? "◐" : "○"}`
+        : "";
+    if (bl) {
+      return `• ${m.metricKey}${conf}: ${m.metricValue} | 行中位: ${bl.median} (P25:${bl.p25}/P75:${bl.p75})`;
+    }
+    return `• ${m.metricKey}${conf}: ${m.metricValue}`;
+  });
+
+  return `📊 ${name} (${period.label})\n${lines.join("\n")}`;
 }
