@@ -14,6 +14,7 @@ import {
 } from "./routers/finance-entries";
 import { subtasksRouter } from "./routers/subtasks";
 import { commentsRouter } from "./routers/comments";
+import { benchmarkRouter } from "./routers/benchmark";
 import { kanbanRouter } from "./routers/kanban";
 import { workspacesRouter } from "./routers/workspaces";
 import {
@@ -54,6 +55,7 @@ export const appRouter = router({
   system: systemRouter,
   ai: aiRouter,
   search: searchRouter,
+  benchmark: benchmarkRouter,
   auth: authRouter,
 
   workspaces: workspacesRouter,

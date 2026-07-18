@@ -197,6 +197,38 @@ const FP_SELF_REPAIR = [
       /* 已存在 */
     }
   })(),
+  // v4.4 WO-BE-1: workspace.type 列 (normal|benchmark)
+  (() => {
+    try {
+      sqlite.exec(
+        "ALTER TABLE workspaces ADD COLUMN type TEXT DEFAULT 'normal'"
+      );
+    } catch (e: unknown) {
+      if (!String(e).includes("duplicate column")) {
+        logger.warn(
+          { ctx: "db" },
+          `[self-repair] ALTER workspaces.type failed: ${
+            e instanceof Error ? e.message : String(e)
+          }`
+        );
+      }
+    }
+  })(),
+  // v4.4 WO-BE-2: Benchmark Intelligence Engine 9 表 (不靠 drizzle-kit migration)
+  `CREATE TABLE IF NOT EXISTS benchmark_entities (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, ticker TEXT, market TEXT, gics_group TEXT NOT NULL, gics_sub TEXT, createdAt TEXT)`,
+  `CREATE TABLE IF NOT EXISTS benchmark_periods (id INTEGER PRIMARY KEY AUTOINCREMENT, entity_id INTEGER NOT NULL, period_type TEXT NOT NULL, fiscal_year INTEGER NOT NULL, label TEXT, start_date TEXT, end_date TEXT, createdAt TEXT, UNIQUE(entity_id, period_type, fiscal_year, label))`,
+  `CREATE TABLE IF NOT EXISTS benchmark_statements (id INTEGER PRIMARY KEY AUTOINCREMENT, period_id INTEGER NOT NULL, statement_type TEXT NOT NULL, createdAt TEXT)`,
+  `CREATE TABLE IF NOT EXISTS benchmark_metrics (id INTEGER PRIMARY KEY AUTOINCREMENT, period_id INTEGER NOT NULL, statement_id INTEGER, metric_key TEXT NOT NULL, metric_value REAL, unit TEXT DEFAULT 'USD_millions', confidence REAL DEFAULT 1.0, source_id INTEGER, createdAt TEXT)`,
+  `CREATE TABLE IF NOT EXISTS benchmark_sources (id INTEGER PRIMARY KEY AUTOINCREMENT, entity_id INTEGER, period_id INTEGER, source_url TEXT NOT NULL, license_note TEXT NOT NULL, standard TEXT, imported_by TEXT, version INTEGER DEFAULT 1, superseded INTEGER DEFAULT 0, createdAt TEXT)`,
+  `CREATE TABLE IF NOT EXISTS benchmark_metric_relations (id INTEGER PRIMARY KEY AUTOINCREMENT, from_metric TEXT NOT NULL, to_metric TEXT NOT NULL, relation TEXT NOT NULL, direction TEXT, createdAt TEXT)`,
+  `CREATE TABLE IF NOT EXISTS benchmark_ontology (id INTEGER PRIMARY KEY AUTOINCREMENT, canonical TEXT NOT NULL, alias TEXT NOT NULL, lang TEXT, createdAt TEXT)`,
+  `CREATE TABLE IF NOT EXISTS benchmark_industry_baseline (id INTEGER PRIMARY KEY AUTOINCREMENT, gics_group TEXT NOT NULL, period_type TEXT NOT NULL, metric_key TEXT NOT NULL, median REAL, p25 REAL, p75 REAL, top10pct REAL, top25pct REAL, sample_size INTEGER, computed_at TEXT)`,
+  `CREATE TABLE IF NOT EXISTS benchmark_facts (id INTEGER PRIMARY KEY AUTOINCREMENT, entity_id INTEGER, period_id INTEGER, subject TEXT NOT NULL, predicate TEXT NOT NULL, object TEXT NOT NULL, evidence_source_id INTEGER, confidence REAL DEFAULT 1.0, createdAt TEXT)`,
+  `CREATE INDEX IF NOT EXISTS idx_benchmark_entities_name ON benchmark_entities(name)`,
+  `CREATE INDEX IF NOT EXISTS idx_benchmark_periods_lookup ON benchmark_periods(entity_id, period_type, fiscal_year)`,
+  `CREATE INDEX IF NOT EXISTS idx_benchmark_metrics_lookup ON benchmark_metrics(period_id, metric_key)`,
+  `CREATE INDEX IF NOT EXISTS idx_benchmark_baseline_lookup ON benchmark_industry_baseline(gics_group, period_type, metric_key)`,
+  `CREATE INDEX IF NOT EXISTS idx_benchmark_facts_lookup ON benchmark_facts(entity_id, period_id, predicate)`,
 ];
 for (const ddl of FP_SELF_REPAIR) {
   if (typeof ddl === "string") {

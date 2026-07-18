@@ -636,11 +636,7 @@
       "indexes": {
         "budgets_projectId_accountId_period_unique": {
           "name": "budgets_projectId_accountId_period_unique",
-          "columns": [
-            "projectId",
-            "accountId",
-            "period"
-          ],
+          "columns": ["projectId", "accountId", "period"],
           "isUnique": true
         }
       },
@@ -712,10 +708,7 @@
       "indexes": {
         "closings_projectId_period_unique": {
           "name": "closings_projectId_period_unique",
-          "columns": [
-            "projectId",
-            "period"
-          ],
+          "columns": ["projectId", "period"],
           "isUnique": true
         }
       },
@@ -1112,9 +1105,7 @@
       "indexes": {
         "feature_flags_key_unique": {
           "name": "feature_flags_key_unique",
-          "columns": [
-            "key"
-          ],
+          "columns": ["key"],
           "isUnique": true
         }
       },
@@ -2185,9 +2176,7 @@
       "indexes": {
         "users_openId_unique": {
           "name": "users_openId_unique",
-          "columns": [
-            "openId"
-          ],
+          "columns": ["openId"],
           "isUnique": true
         }
       },
@@ -2535,9 +2524,7 @@
       "indexes": {
         "workspaces_slug_unique": {
           "name": "workspaces_slug_unique",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "isUnique": true
         }
       },

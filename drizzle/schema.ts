@@ -523,6 +523,7 @@ export const workspaces = sqliteTable("workspaces", {
   slug: text("slug", { length: 64 }).notNull().unique(),
   createdBy: integer("createdBy").notNull(),
   status: text("status").notNull().default("active"), // active | suspended | archived
+  type: text("type").notNull().default("normal"), // v4.4: normal | benchmark
   settings: text("settings"), // JSON: { allowMemberCreateProject, defaultProjectVisibility }
   createdAt: text("createdAt")
     .notNull()
